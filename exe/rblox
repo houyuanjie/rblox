@@ -1,4 +1,16 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'rblox'
+require 'rblox/runner'
+
+runner = Rblox::Runner.new
+
+case ARGV.size
+when 0
+  runner.run_prompt
+when 1
+  runner.run_file(ARGV[0])
+else
+  puts 'Usage: rblox [script]'
+  exit 64
+end
