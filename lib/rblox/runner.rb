@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
+require 'pp'
 require_relative 'scanner'
+require_relative 'parser'
 
 module Rblox
   class Runner
@@ -32,10 +34,12 @@ module Rblox
     def run(source)
       scanner = Scanner.new(self, source)
       tokens = scanner.scan_tokens
+      parser = Parser.new(self, tokens)
+      expression = parser.parse
 
-      tokens.each do |token|
-        puts token
-      end
+      return if @had_error
+
+      pp expression
     end
 
     def error(line, message)
@@ -45,6 +49,14 @@ module Rblox
     def report(line, where, message)
       puts "[line #{line}] Error#{where}: #{message}"
       @had_error = true
+    end
+
+    def parse_error(token, message)
+      if token.type == TokenType::EOF
+        report(token.line, ' at end', message)
+      else
+        report(token.line, " at '#{token.lexeme}'", message)
+      end
     end
   end
 end
