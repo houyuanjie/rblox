@@ -39,11 +39,11 @@ module Rblox
       scanner = Scanner.new(self, source)
       tokens = scanner.scan_tokens
       parser = Parser.new(self, tokens)
-      expression = parser.parse
+      statements = parser.parse
 
       return if @had_error
 
-      @interpreter.interpret(expression)
+      @interpreter.interpret(statements)
     end
 
     def error(line, message)

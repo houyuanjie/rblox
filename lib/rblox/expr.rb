@@ -2,7 +2,7 @@
 
 module Rblox
   module Expr
-    TYPES = {
+    variants = {
       'Assign' => %w[name value],
       'Binary' => %w[left operator right],
       'Call' => %w[callee paren arguments],
@@ -15,9 +15,9 @@ module Rblox
       'This' => %w[keyword],
       'Unary' => %w[operator right],
       'Variable' => %w[name]
-    }.freeze
+    }
 
-    TYPES.each do |klass_name, fields|
+    variants.each do |klass_name, fields|
       klass = Data.define(*fields) do
         define_method :accept do |visitor|
           visitor_method = "visit_#{klass_name.downcase}_expr"

@@ -2,16 +2,19 @@
 
 require_relative 'error'
 require_relative 'token_type'
+require_relative 'environment'
 
 module Rblox
   class Interpreter
     def initialize(runner)
       @runner = runner
+      @environment = Environment.new
     end
 
-    def interpret(expression)
-      value = evaluate(expression)
-      puts stringify(value)
+    def interpret(statements)
+      statements.each do |stmt|
+        execute(stmt)
+      end
     rescue RuntimeError => e
       @runner.runtime_error(e)
     end
@@ -78,6 +81,38 @@ module Rblox
 
     def visit_grouping_expr(expr) = evaluate(expr.expression)
 
+    def visit_variable_expr(expr) = @environment.get(expr.name)
+
+    def visit_assign_expr(expr)
+      value = evaluate(expr.value)
+      @environment.assign(expr.name, value)
+      value
+    end
+
+    def visit_block_stmt(stmt)
+      execute_block(stmt.statements, Environment.new(@environment))
+      nil
+    end
+
+    def visit_expression_stmt(stmt)
+      evaluate(stmt.expression)
+      nil
+    end
+
+    def visit_print_stmt(stmt)
+      value = evaluate(stmt.expression)
+      puts stringify(value)
+      nil
+    end
+
+    def visit_var_stmt(stmt)
+      value = nil
+      value = evaluate(stmt.initializer) if stmt.initializer
+
+      @environment.define(stmt.name.lexeme, value)
+      nil
+    end
+
     private
 
     def check_number_operand(operator, operand)
@@ -107,5 +142,18 @@ module Rblox
     end
 
     def evaluate(expr) = expr.accept(self)
+
+    def execute(stmt) = stmt.accept(self)
+
+    def execute_block(statements, environment)
+      previous = @environment
+      @environment = environment
+
+      statements.each do |stmt|
+        execute(stmt)
+      end
+    ensure
+      @environment = previous
+    end
   end
 end

@@ -3,6 +3,7 @@
 require_relative 'error'
 require_relative 'token_type'
 require_relative 'expr'
+require_relative 'stmt'
 
 module Rblox
   class Parser
@@ -16,14 +17,75 @@ module Rblox
     end
 
     def parse
-      expression
-    rescue ParseError
-      nil
+      statements = []
+      statements << declaration until at_end?
+      statements
     end
 
     private
 
-    def expression = equality
+    def declaration
+      return var_declaration if match?(TokenType::VAR)
+
+      statement
+    rescue ParseError
+      synchronize
+      nil
+    end
+
+    def var_declaration
+      name = consume(TokenType::IDENTIFIER, 'Expect variable name.')
+      initializer = nil
+      initializer = expression if match?(TokenType::EQUAL)
+      consume(TokenType::SEMICOLON, "Expect ';' after variable declaration.")
+      Stmt::Var.new(name, initializer)
+    end
+
+    def statement
+      return print_statement if match?(TokenType::PRINT)
+      return Stmt::Block.new(block) if match?(TokenType::LEFT_BRACE)
+
+      expression_statement
+    end
+
+    def print_statement
+      value = expression
+      consume(TokenType::SEMICOLON, "Expect ';' after value.")
+      Stmt::Print.new(value)
+    end
+
+    def expression_statement
+      expr = expression
+      consume(TokenType::SEMICOLON, "Expect ';' after expression.")
+      Stmt::Expression.new(expr)
+    end
+
+    def block
+      statements = []
+      statements << declaration until checked?(TokenType::RIGHT_BRACE) || at_end?
+      consume(TokenType::RIGHT_BRACE, "Expect '}' after block.")
+      statements
+    end
+
+    def expression = assignment
+
+    def assignment
+      expr = equality
+
+      if match?(TokenType::EQUAL)
+        equals = previous
+        value = assignment
+
+        if expr.is_a?(Expr::Variable)
+          name = expr.name
+          return Expr::Assign.new(name, value)
+        end
+
+        error(equals, 'Invalid assignment target.')
+      end
+
+      expr
+    end
 
     def equality
       expr = comparison
@@ -92,6 +154,8 @@ module Rblox
         Expr::Literal.new(nil)
       elsif match?(TokenType::NUMBER, TokenType::STRING)
         Expr::Literal.new(previous.literal)
+      elsif match?(TokenType::IDENTIFIER)
+        Expr::Variable.new(previous)
       elsif match?(TokenType::LEFT_PAREN)
         expr = expression
         consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.")
@@ -113,7 +177,7 @@ module Rblox
     end
 
     def consume(type, message)
-      advance if checked?(type)
+      return advance if checked?(type)
 
       raise error(peek, message)
     end
