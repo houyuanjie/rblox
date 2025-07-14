@@ -4,53 +4,53 @@ module Rblox
   module TokenType
     # Single-character tokens
 
-    LEFT_PAREN = :left_paren
-    RIGHT_PAREN = :right_paren
-    LEFT_BRACE = :left_brace
-    RIGHT_BRACE = :right_brace
-    COMMA = :comma
-    DOT = :dot
-    MINUS = :minus
-    PLUS = :plus
-    SEMICOLON = :semicolon
-    SLASH = :slash
-    STAR = :star
+    LEFT_PAREN = :tkn_left_paren
+    RIGHT_PAREN = :tkn_right_paren
+    LEFT_BRACE = :tkn_left_brace
+    RIGHT_BRACE = :tkn_right_brace
+    COMMA = :tkn_comma
+    DOT = :tkn_dot
+    MINUS = :tkn_minus
+    PLUS = :tkn_plus
+    SEMICOLON = :tkn_semicolon
+    SLASH = :tkn_slash
+    STAR = :tkn_star
 
     # One or two character tokens
 
-    BANG = :bang
-    BANG_EQUAL = :bang_equal
-    EQUAL = :equal
-    EQUAL_EQUAL = :equal_equal
-    GREATER = :greater
-    GREATER_EQUAL = :greater_equal
-    LESS = :less
-    LESS_EQUAL = :less_equal
+    BANG = :tkn_bang
+    BANG_EQUAL = :tkn_bang_equal
+    EQUAL = :tkn_equal
+    EQUAL_EQUAL = :tkn_equal_equal
+    GREATER = :tkn_greater
+    GREATER_EQUAL = :tkn_greater_equal
+    LESS = :tkn_less
+    LESS_EQUAL = :tkn_less_equal
 
     # Literals
 
-    IDENTIFIER = :identifier
-    STRING = :string
-    NUMBER = :number
+    IDENTIFIER = :lit_identifier
+    STRING = :lit_string
+    NUMBER = :lit_number
 
     # Keywords
 
-    AND = :and
-    CLASS = :class
-    ELSE = :else
-    FALSE = false
-    FUN = :fun
-    FOR = :for
-    IF = :if
-    NIL = :nil
-    OR = :or
-    PRINT = :print
-    RETURN = :return
-    SUPER = :super
-    THIS = :this
-    TRUE = true
-    VAR = :var
-    WHILE = :while
+    AND = :kw_and
+    CLASS = :kw_class
+    ELSE = :kw_else
+    FALSE = :kw_false
+    FUN = :kw_fun
+    FOR = :kw_for
+    IF = :kw_if
+    NIL = :kw_nil
+    OR = :kw_or
+    PRINT = :kw_print
+    RETURN = :kw_return
+    SUPER = :kw_super
+    THIS = :kw_this
+    TRUE = :kw_true
+    VAR = :kw_var
+    WHILE = :kw_while
 
     EOF = :eof
 

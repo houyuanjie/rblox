@@ -1,15 +1,18 @@
 # frozen_string_literal: true
 
-require 'pp'
 require_relative 'scanner'
 require_relative 'parser'
+require_relative 'interpreter'
 
 module Rblox
   class Runner
-    attr_reader :had_error
+    attr_reader :had_error, :had_runtime_error
 
     def initialize
+      @interpreter = Interpreter.new(self)
+
       @had_error = false
+      @had_runtime_error = false
     end
 
     def run_file(path)
@@ -17,6 +20,7 @@ module Rblox
       run(source)
 
       exit 65 if @had_error
+      exit 70 if @had_runtime_error
     end
 
     def run_prompt
@@ -39,7 +43,7 @@ module Rblox
 
       return if @had_error
 
-      pp expression
+      @interpreter.interpret(expression)
     end
 
     def error(line, message)
@@ -57,6 +61,11 @@ module Rblox
       else
         report(token.line, " at '#{token.lexeme}'", message)
       end
+    end
+
+    def runtime_error(error)
+      puts "#{error.message}\n[line #{error.token.line}]"
+      @had_runtime_error = true
     end
   end
 end
