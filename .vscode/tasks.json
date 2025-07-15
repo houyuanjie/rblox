@@ -1,0 +1,44 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "rdbg: exe/rblox (prompt)",
+      "type": "shell",
+      "command": "bundle",
+      "args": [
+        "exec",
+        "rdbg",
+        "--open",
+        "--command",
+        "--",
+        "bundle",
+        "exec",
+        "ruby",
+        "--",
+        "exe/rblox"
+      ],
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "rdbg: exe/rblox (tmp/text.lox)",
+      "type": "shell",
+      "command": "bundle",
+      "args": [
+        "exec",
+        "rdbg",
+        "--open",
+        "--command",
+        "--",
+        "bundle",
+        "exec",
+        "ruby",
+        "--",
+        "exe/rblox",
+        "tmp/test.lox"
+      ],
+      "problemMatcher": [],
+      "isBackground": true
+    }
+  ]
+}

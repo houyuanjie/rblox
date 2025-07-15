@@ -7,4 +7,6 @@
 /spec/reports/
 /tmp/
 
-/.vscode/
+/.vscode/**/*
+!/.vscode/tasks.json
+!/.vscode/launch.json
