@@ -2,16 +2,28 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "[ruby-lsp] Attach to rdbg: exe/rblox (prompt)",
       "type": "ruby_lsp",
       "request": "attach",
-      "name": "Attach to rdbg: exe/rblox (prompt)",
       "preLaunchTask": "rdbg: exe/rblox (prompt)"
     },
     {
+      "name": "[ruby-lsp] Attach to rdbg: exe/rblox (debug/main.lox)",
       "type": "ruby_lsp",
       "request": "attach",
-      "name": "Attach to rdbg: exe/rblox (tmp/text.lox)",
-      "preLaunchTask": "rdbg: exe/rblox (tmp/text.lox)"
+      "preLaunchTask": "rdbg: exe/rblox (debug/main.lox)"
+    },
+    {
+      "name": "[rdbg] Attach to rdbg: exe/rblox (prompt)",
+      "type": "rdbg",
+      "request": "attach",
+      "preLaunchTask": "rdbg: exe/rblox (prompt)"
+    },
+    {
+      "name": "[rdbg] Attach to rdbg: exe/rblox (debug/main.lox)",
+      "type": "rdbg",
+      "request": "attach",
+      "preLaunchTask": "rdbg: exe/rblox (debug/main.lox)"
     }
   ]
 }
