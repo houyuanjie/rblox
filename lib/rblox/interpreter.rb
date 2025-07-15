@@ -163,7 +163,7 @@ module Rblox
 
     def stringify(object)
       return 'nil' if object.nil?
-      return eval "%Q(#{object})", binding, __FILE__, __LINE__ if object.is_a?(String) # "#{object}"
+      return eval %("#{object}"), binding, __FILE__, __LINE__ if object.is_a?(String) # "#{object}"
       return format '%g', object if object.is_a?(Float)
 
       object.to_s
