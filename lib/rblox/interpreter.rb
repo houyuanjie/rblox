@@ -21,6 +21,16 @@ module Rblox
 
     def visit_literal_expr(expr) = expr.value
 
+    def visit_logical_expr(expr)
+      left = evaluate(expr.left)
+
+      operator_type = expr.operator.type
+      return left if operator_type == TokenType::OR && truthy?(left)
+      return left if operator_type == TokenType::AND && !truthy?(left)
+
+      evaluate(expr.right)
+    end
+
     def visit_unary_expr(expr)
       right = evaluate(expr.right)
 
@@ -89,6 +99,13 @@ module Rblox
       value
     end
 
+    def visit_var_stmt(stmt)
+      value = stmt.initializer ? evaluate(stmt.initializer) : nil
+
+      @environment.define(stmt.name.lexeme, value)
+      nil
+    end
+
     def visit_block_stmt(stmt)
       execute_block(stmt.statements, Environment.new(@environment))
       nil
@@ -101,16 +118,26 @@ module Rblox
 
     def visit_print_stmt(stmt)
       value = evaluate(stmt.expression)
+      print stringify(value)
+      nil
+    end
+
+    def visit_println_stmt(stmt)
+      value = evaluate(stmt.expression)
       puts stringify(value)
       nil
     end
 
-    def visit_var_stmt(stmt)
-      value = nil
-      value = evaluate(stmt.initializer) if stmt.initializer
+    def visit_if_stmt(stmt)
+      if truthy?(evaluate(stmt.condition))
+        execute(stmt.then_branch)
+      elsif !stmt.else_branch.nil?
+        execute(stmt.else_branch)
+      end
+    end
 
-      @environment.define(stmt.name.lexeme, value)
-      nil
+    def visit_while_stmt(stmt)
+      execute(stmt.body) while truthy?(evaluate(stmt.condition))
     end
 
     private
@@ -136,7 +163,8 @@ module Rblox
 
     def stringify(object)
       return 'nil' if object.nil?
-      return format('%g', object) if object.is_a?(Float)
+      return eval "%Q(#{object})", binding, __FILE__, __LINE__ if object.is_a?(String) # "#{object}"
+      return format '%g', object if object.is_a?(Float)
 
       object.to_s
     end

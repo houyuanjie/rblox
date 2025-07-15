@@ -45,6 +45,7 @@ module Rblox
     NIL = :kw_nil
     OR = :kw_or
     PRINT = :kw_print
+    PRINTLN = :kw_println
     RETURN = :kw_return
     SUPER = :kw_super
     THIS = :kw_this

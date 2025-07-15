@@ -9,6 +9,7 @@ module Rblox
       'Function' => %w[name params body],
       'If' => %w[condition then_branch else_branch],
       'Print' => %w[expression],
+      'Println' => %w[expression],
       'Return' => %w[keyword value],
       'Var' => %w[name initializer],
       'While' => %w[condition body]

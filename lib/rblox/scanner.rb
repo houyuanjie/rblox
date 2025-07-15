@@ -17,6 +17,7 @@ module Rblox
       'nil' => TokenType::NIL,
       'or' => TokenType::OR,
       'print' => TokenType::PRINT,
+      'println' => TokenType::PRINTLN,
       'return' => TokenType::RETURN,
       'super' => TokenType::SUPER,
       'this' => TokenType::THIS,
