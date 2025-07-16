@@ -17,7 +17,7 @@ module Rblox
       elsif @enclosing
         @enclosing.get(name)
       else
-        raise RuntimeError.new(name, "Undefined variable '#{name.lexeme}'.")
+        raise Rblox::RuntimeError.new(name, "Undefined variable '#{name.lexeme}'.")
       end
     end
 
@@ -28,7 +28,7 @@ module Rblox
       elsif @enclosing
         @enclosing.assign(name, value)
       else
-        raise RuntimeError.new(name, "Undefined variable '#{name.lexeme}'.")
+        raise Rblox::RuntimeError.new(name, "Undefined variable '#{name.lexeme}'.")
       end
     end
 

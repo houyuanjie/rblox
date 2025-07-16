@@ -7,8 +7,6 @@ require_relative 'stmt'
 
 module Rblox
   class Parser
-    class ParseError < Error; end
-
     def initialize(runner, tokens)
       @runner = runner
 
@@ -25,12 +23,37 @@ module Rblox
     private
 
     def declaration
+      return fun_declaration(:function) if match?(TokenType::FUN)
       return var_declaration if match?(TokenType::VAR)
 
       statement
-    rescue ParseError
+    rescue Rblox::ParseError
       synchronize
       nil
+    end
+
+    def fun_declaration(kind)
+      name = consume(TokenType::IDENTIFIER, "Expect #{kind} name.")
+
+      consume(TokenType::LEFT_PAREN, "Expect '(' after #{kind} name.")
+
+      parameters = []
+      unless checked?(TokenType::RIGHT_PAREN)
+        loop do
+          error(current_token, "Can't have more than 255 parameters.") if parameters.size >= 255
+
+          parameters << consume(TokenType::IDENTIFIER, 'Expect parameter name.')
+
+          break unless match?(TokenType::COMMA)
+        end
+      end
+
+      consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters.")
+      consume(TokenType::LEFT_BRACE, "Expect '{' before #{kind} body.")
+
+      body = block
+
+      Stmt::Function.new(name, parameters, body)
     end
 
     def var_declaration
@@ -46,6 +69,7 @@ module Rblox
       return if_statement if match?(TokenType::IF)
       return print_statement if match?(TokenType::PRINT)
       return println_statement if match?(TokenType::PRINTLN)
+      return return_statement if match?(TokenType::RETURN)
       return while_statement if match?(TokenType::WHILE)
       return Stmt::Block.new(block) if match?(TokenType::LEFT_BRACE)
 
@@ -103,6 +127,15 @@ module Rblox
       consume(TokenType::SEMICOLON, "Expect ';' after value.")
 
       Stmt::Println.new(value)
+    end
+
+    def return_statement
+      keyword = previous_token
+      value = checked?(TokenType::SEMICOLON) ? nil : expression
+
+      consume(TokenType::SEMICOLON, "Expect ';' after return value.")
+
+      Stmt::Return.new(keyword, value)
     end
 
     def while_statement
@@ -227,7 +260,37 @@ module Rblox
         return Expr::Unary.new(operator, right)
       end
 
-      parse_primary_expr
+      parse_call_expr
+    end
+
+    def parse_call_expr
+      expr = parse_primary_expr
+
+      loop do
+        break unless match?(TokenType::LEFT_PAREN)
+
+        expr = finish_parse_call_expr(expr)
+      end
+
+      expr
+    end
+
+    def finish_parse_call_expr(callee)
+      arguments = []
+
+      unless checked?(TokenType::RIGHT_PAREN)
+        arguments << expression
+
+        while match?(TokenType::COMMA)
+          error(current_token, "Can't have more than 255 arguments.") if arguments.size >= 255
+
+          arguments << expression
+        end
+      end
+
+      paren = consume(TokenType::RIGHT_PAREN, "Expect ')' after arguments.")
+
+      Expr::Call.new(callee, paren, arguments)
     end
 
     def parse_primary_expr
@@ -288,7 +351,7 @@ module Rblox
 
     def error(token, message)
       @runner.parse_error(token, message)
-      ParseError.new
+      Rblox::ParseError.new
     end
 
     def synchronize

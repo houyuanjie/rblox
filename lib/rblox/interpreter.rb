@@ -3,20 +3,38 @@
 require_relative 'error'
 require_relative 'token_type'
 require_relative 'environment'
+require_relative 'callable'
 
 module Rblox
   class Interpreter
+    attr_reader :globals
+
     def initialize(runner)
       @runner = runner
-      @environment = Environment.new
+
+      @globals = Environment.new
+      @environment = @globals
+
+      @globals.define('clock', Callable.new(0) { Time.now })
     end
 
     def interpret(statements)
       statements.each do |stmt|
         execute(stmt)
       end
-    rescue RuntimeError => e
+    rescue Rblox::RuntimeError => e
       @runner.runtime_error(e)
+    end
+
+    def execute_block(statements, environment)
+      previous = @environment
+      @environment = environment
+
+      statements.each do |stmt|
+        execute(stmt)
+      end
+    ensure
+      @environment = previous
     end
 
     def visit_literal_expr(expr) = expr.value
@@ -74,7 +92,7 @@ module Rblox
         checked_right = right.is_a?(Float) || right.is_a?(String)
 
         unless checked_left && checked_right
-          raise RuntimeError.new(expr.operator, 'Operands must be two numbers or two strings.')
+          raise Rblox::RuntimeError.new(expr.operator, 'Operands must be two numbers or two strings.')
         end
 
         return left + right
@@ -89,6 +107,19 @@ module Rblox
       nil
     end
 
+    def visit_call_expr(expr)
+      callee = evaluate(expr.callee)
+      arguments = expr.arguments.collect { evaluate(it) }
+
+      raise Rblox::RuntimeError.new(expr.paren, 'Can only call functions and classes.') unless callee.respond_to?(:call)
+
+      unless arguments.size == callee.arity
+        raise Rblox::RuntimeError.new(expr.paren, "Expected #{callee.arity} arguments but got #{arguments.size}.")
+      end
+
+      callee.call(self, arguments)
+    end
+
     def visit_grouping_expr(expr) = evaluate(expr.expression)
 
     def visit_variable_expr(expr) = @environment.get(expr.name)
@@ -96,35 +127,53 @@ module Rblox
     def visit_assign_expr(expr)
       value = evaluate(expr.value)
       @environment.assign(expr.name, value)
+
       value
     end
 
     def visit_var_stmt(stmt)
       value = stmt.initializer ? evaluate(stmt.initializer) : nil
-
       @environment.define(stmt.name.lexeme, value)
+
       nil
     end
 
     def visit_block_stmt(stmt)
       execute_block(stmt.statements, Environment.new(@environment))
+
       nil
     end
 
     def visit_expression_stmt(stmt)
       evaluate(stmt.expression)
+
       nil
+    end
+
+    def visit_function_stmt(stmt)
+      function = Callable.function(stmt, @environment)
+      @environment.define(stmt.name.lexeme, function)
+
+      nil
+    end
+
+    def visit_return_stmt(stmt)
+      value = stmt.value ? evaluate(stmt.value) : nil
+
+      raise Rblox::Return, value
     end
 
     def visit_print_stmt(stmt)
       value = evaluate(stmt.expression)
       print stringify(value)
+
       nil
     end
 
     def visit_println_stmt(stmt)
       value = evaluate(stmt.expression)
       puts stringify(value)
+
       nil
     end
 
@@ -145,13 +194,13 @@ module Rblox
     def check_number_operand(operator, operand)
       return if operand.is_a?(Float)
 
-      raise RuntimeError.new(operator, 'Operand must be a number.')
+      raise Rblox::RuntimeError.new(operator, 'Operand must be a number.')
     end
 
     def check_number_operands(operator, left, right)
       return if left.is_a?(Float) && right.is_a?(Float)
 
-      raise RuntimeError.new(operator, 'Operands must be numbers.')
+      raise Rblox::RuntimeError.new(operator, 'Operands must be numbers.')
     end
 
     def truthy?(object)
@@ -191,16 +240,5 @@ module Rblox
     def evaluate(expr) = expr.accept(self)
 
     def execute(stmt) = stmt.accept(self)
-
-    def execute_block(statements, environment)
-      previous = @environment
-      @environment = environment
-
-      statements.each do |stmt|
-        execute(stmt)
-      end
-    ensure
-      @environment = previous
-    end
   end
 end
