@@ -16,9 +16,6 @@ AllCops:
   TargetRubyVersion: 3.4
   NewCops: enable
 
-Security/Eval:
-  Enabled: false
-
 Style/Documentation:
   Enabled: false
 

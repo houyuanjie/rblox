@@ -163,10 +163,29 @@ module Rblox
 
     def stringify(object)
       return 'nil' if object.nil?
-      return eval %("#{object}"), binding, __FILE__, __LINE__ if object.is_a?(String) # "#{object}"
+      return unescaped(object) if object.is_a?(String) # "#{object}"
       return format '%g', object if object.is_a?(Float)
 
       object.to_s
+    end
+
+    def unescaped(string)
+      unescapes = {
+        '\\\\' => '\\',
+        '\\"' => '"',
+        '\\0' => "\0",
+        '\\a' => "\a",
+        '\\b' => "\b",
+        '\\t' => "\t",
+        '\\n' => "\n",
+        '\\v' => "\v",
+        '\\f' => "\f",
+        '\\r' => "\r"
+      }
+
+      string.gsub(Regexp.union(unescapes.keys)) do |m|
+        unescapes[m]
+      end
     end
 
     def evaluate(expr) = expr.accept(self)
