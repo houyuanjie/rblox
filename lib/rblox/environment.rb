@@ -12,26 +12,53 @@ module Rblox
     end
 
     def get(name)
-      if @values.key?(name.lexeme)
-        @values[name.lexeme]
+      name = lexeme_or(name)
+
+      if @values.key?(name)
+        @values[name]
       elsif @enclosing
         @enclosing.get(name)
       else
-        raise Rblox::RuntimeError.new(name, "Undefined variable '#{name.lexeme}'.")
+        raise Rblox::RuntimeError.new(name, "Undefined variable '#{name}'.")
       end
     end
 
     def assign(name, value)
-      if @values.key?(name.lexeme)
-        @values[name.lexeme] = value
-        nil
+      name = lexeme_or(name)
+
+      if @values.key?(name)
+        @values[name] = value
       elsif @enclosing
         @enclosing.assign(name, value)
       else
-        raise Rblox::RuntimeError.new(name, "Undefined variable '#{name.lexeme}'.")
+        raise Rblox::RuntimeError.new(name, "Undefined variable '#{name}'.")
       end
     end
 
-    def define(name, value) = @values[name] = value
+    def define(name, value) = @values[lexeme_or(name)] = value
+
+    def ancestor(distance)
+      environment = self
+
+      distance.times do
+        environment = environment.enclosing
+      end
+
+      environment
+    end
+
+    def get_at(distance, name) = ancestor(distance).values[lexeme_or(name)]
+
+    def assign_at(distance, name, value) = ancestor(distance).values[lexeme_or(name)] = value
+
+    def to_s = "Environment(values = #{@values}, enclosing = #{@enclosing})"
+
+    protected
+
+    attr_reader :values
+
+    private
+
+    def lexeme_or(name) = name.respond_to?(:lexeme) ? name.lexeme : name
   end
 end

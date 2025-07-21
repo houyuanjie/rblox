@@ -15,27 +15,140 @@ module Rblox
       @globals = Environment.new
       @environment = @globals
 
+      @locals = {}
+
       @globals.define('clock', Callable.new(0) { Time.now })
     end
 
     def interpret(statements)
-      statements.each do |stmt|
-        execute(stmt)
-      end
+      execute(statements)
     rescue Rblox::RuntimeError => e
       @runner.runtime_error(e)
     end
+
+    def resolve(expr, depth) = @locals[expr] = depth
 
     def execute_block(statements, environment)
       previous = @environment
       @environment = environment
 
-      statements.each do |stmt|
-        execute(stmt)
+      begin
+        execute(statements)
+      ensure
+        @environment = previous
       end
-    ensure
-      @environment = previous
     end
+
+    def visit_block_stmt(stmt) = execute_block(stmt.statements, Environment.new(@environment))
+
+    def visit_expression_stmt(stmt) = evaluate(stmt.expression)
+
+    def visit_function_stmt(stmt)
+      function = Callable.function(stmt, @environment)
+      @environment.define(stmt.name, function)
+    end
+
+    def visit_if_stmt(stmt)
+      if truthy?(evaluate(stmt.condition))
+        execute(stmt.then_branch)
+      elsif stmt.else_branch
+        execute(stmt.else_branch)
+      end
+    end
+
+    def visit_print_stmt(stmt)
+      value = evaluate(stmt.expression)
+      print stringify(value)
+    end
+
+    def visit_println_stmt(stmt)
+      value = evaluate(stmt.expression)
+      puts stringify(value)
+    end
+
+    def visit_return_stmt(stmt)
+      value = stmt.value ? evaluate(stmt.value) : nil
+
+      raise Rblox::Return, value
+    end
+
+    def visit_var_stmt(stmt)
+      value = stmt.initializer ? evaluate(stmt.initializer) : nil
+      @environment.define(stmt.name, value)
+    end
+
+    def visit_while_stmt(stmt)
+      execute(stmt.body) while truthy?(evaluate(stmt.condition))
+    end
+
+    def visit_assign_expr(expr)
+      value = evaluate(expr.value)
+
+      if (distance = @locals[expr])
+        @environment.assign_at(distance, expr.name, value)
+      else
+        @globals.assign(expr.name, value)
+      end
+
+      value
+    end
+
+    def visit_binary_expr(expr)
+      left = evaluate(expr.left)
+      right = evaluate(expr.right)
+
+      case expr.operator.type
+      when TokenType::BANG_EQUAL
+        left != right
+      when TokenType::EQUAL_EQUAL
+        left == right
+      when TokenType::GREATER
+        check_number_operands(expr.operator, left, right)
+        left > right
+      when TokenType::GREATER_EQUAL
+        check_number_operands(expr.operator, left, right)
+        left >= right
+      when TokenType::LESS
+        check_number_operands(expr.operator, left, right)
+        left < right
+      when TokenType::LESS_EQUAL
+        check_number_operands(expr.operator, left, right)
+        left <= right
+      when TokenType::MINUS
+        check_number_operands(expr.operator, left, right)
+        left - right
+      when TokenType::PLUS
+        both_float = left.is_a?(Float) && right.is_a?(Float)
+        both_string = left.is_a?(String) && right.is_a?(String)
+
+        unless both_float || both_string
+          raise Rblox::RuntimeError.new(expr.operator, 'Operands must be two numbers or two strings.')
+        end
+
+        left + right
+      when TokenType::SLASH
+        check_number_operands(expr.operator, left, right)
+        left / right
+      when TokenType::STAR
+        check_number_operands(expr.operator, left, right)
+        left * right
+      end
+    end
+
+    def visit_call_expr(expr)
+      callee = evaluate(expr.callee)
+      arguments = expr.arguments.map { |arg| evaluate(arg) }
+
+      raise Rblox::RuntimeError.new(expr.paren, 'Can only call functions and classes.') unless callee.respond_to?(:call)
+
+      unless arguments.size == callee.arity
+        raise Rblox::RuntimeError.new(expr.paren, "Expected #{callee.arity} arguments but got #{arguments.size}.")
+      end
+
+      callee.call(self, arguments)
+    end
+
+    def visit_grouping_expr(expr) = evaluate(expr.expression)
 
     def visit_literal_expr(expr) = expr.value
 
@@ -53,143 +166,35 @@ module Rblox
       right = evaluate(expr.right)
 
       case expr.operator.type
+      when TokenType::BANG
+        !truthy?(right)
       when TokenType::MINUS
         check_number_operand(expr.operator, right)
-        return -Float(right)
-      when TokenType::BANG
-        return !truthy?(right)
-      end
-
-      nil
-    end
-
-    def visit_binary_expr(expr)
-      left = evaluate(expr.left)
-      right = evaluate(expr.right)
-
-      case expr.operator.type
-      when TokenType::BANG_EQUAL
-        return left != right
-      when TokenType::EQUAL_EQUAL
-        return left == right
-      when TokenType::GREATER
-        check_number_operands(expr.operator, left, right)
-        return left > right
-      when TokenType::GREATER_EQUAL
-        check_number_operands(expr.operator, left, right)
-        return left >= right
-      when TokenType::LESS
-        check_number_operands(expr.operator, left, right)
-        return left < right
-      when TokenType::LESS_EQUAL
-        check_number_operands(expr.operator, left, right)
-        return left <= right
-      when TokenType::MINUS
-        check_number_operands(expr.operator, left, right)
-        return left - right
-      when TokenType::PLUS
-        checked_left = left.is_a?(Float) || left.is_a?(String)
-        checked_right = right.is_a?(Float) || right.is_a?(String)
-
-        unless checked_left && checked_right
-          raise Rblox::RuntimeError.new(expr.operator, 'Operands must be two numbers or two strings.')
-        end
-
-        return left + right
-      when TokenType::SLASH
-        check_number_operands(expr.operator, left, right)
-        return left / right
-      when TokenType::STAR
-        check_number_operands(expr.operator, left, right)
-        return left * right
-      end
-
-      nil
-    end
-
-    def visit_call_expr(expr)
-      callee = evaluate(expr.callee)
-      arguments = expr.arguments.collect { evaluate(it) }
-
-      raise Rblox::RuntimeError.new(expr.paren, 'Can only call functions and classes.') unless callee.respond_to?(:call)
-
-      unless arguments.size == callee.arity
-        raise Rblox::RuntimeError.new(expr.paren, "Expected #{callee.arity} arguments but got #{arguments.size}.")
-      end
-
-      callee.call(self, arguments)
-    end
-
-    def visit_grouping_expr(expr) = evaluate(expr.expression)
-
-    def visit_variable_expr(expr) = @environment.get(expr.name)
-
-    def visit_assign_expr(expr)
-      value = evaluate(expr.value)
-      @environment.assign(expr.name, value)
-
-      value
-    end
-
-    def visit_var_stmt(stmt)
-      value = stmt.initializer ? evaluate(stmt.initializer) : nil
-      @environment.define(stmt.name.lexeme, value)
-
-      nil
-    end
-
-    def visit_block_stmt(stmt)
-      execute_block(stmt.statements, Environment.new(@environment))
-
-      nil
-    end
-
-    def visit_expression_stmt(stmt)
-      evaluate(stmt.expression)
-
-      nil
-    end
-
-    def visit_function_stmt(stmt)
-      function = Callable.function(stmt, @environment)
-      @environment.define(stmt.name.lexeme, function)
-
-      nil
-    end
-
-    def visit_return_stmt(stmt)
-      value = stmt.value ? evaluate(stmt.value) : nil
-
-      raise Rblox::Return, value
-    end
-
-    def visit_print_stmt(stmt)
-      value = evaluate(stmt.expression)
-      print stringify(value)
-
-      nil
-    end
-
-    def visit_println_stmt(stmt)
-      value = evaluate(stmt.expression)
-      puts stringify(value)
-
-      nil
-    end
-
-    def visit_if_stmt(stmt)
-      if truthy?(evaluate(stmt.condition))
-        execute(stmt.then_branch)
-      elsif !stmt.else_branch.nil?
-        execute(stmt.else_branch)
+        -Float(right)
       end
     end
 
-    def visit_while_stmt(stmt)
-      execute(stmt.body) while truthy?(evaluate(stmt.condition))
-    end
+    def visit_variable_expr(expr) = look_up_variable(expr.name, expr)
 
     private
+
+    def evaluate(expr) = expr.accept(self)
+
+    def execute(stmt)
+      if stmt.respond_to?(:each)
+        stmt.each { |s| execute(s) }
+      else
+        stmt.accept(self)
+      end
+    end
+
+    def look_up_variable(name, expr)
+      if (distance = @locals[expr])
+        @environment.get_at(distance, name)
+      else
+        @globals.get(name)
+      end
+    end
 
     def check_number_operand(operator, operand)
       return if operand.is_a?(Float)
@@ -212,7 +217,7 @@ module Rblox
 
     def stringify(object)
       return 'nil' if object.nil?
-      return unescaped(object) if object.is_a?(String) # "#{object}"
+      return unescaped(object) if object.is_a?(String)
       return format '%g', object if object.is_a?(Float)
 
       object.to_s
@@ -236,9 +241,5 @@ module Rblox
         unescapes[m]
       end
     end
-
-    def evaluate(expr) = expr.accept(self)
-
-    def execute(stmt) = stmt.accept(self)
   end
 end

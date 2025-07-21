@@ -2,6 +2,7 @@
 
 require_relative 'scanner'
 require_relative 'parser'
+require_relative 'resolver'
 require_relative 'interpreter'
 
 module Rblox
@@ -27,7 +28,7 @@ module Rblox
       loop do
         print '> '
         line = $stdin.gets.chomp
-        break if line == 'exit'
+        break if %w[exit quit].include?(line)
 
         run(line)
 
@@ -43,17 +44,15 @@ module Rblox
 
       return if @had_error
 
+      resolver = Resolver.new(self, @interpreter)
+      resolver.resolve(statements)
+
+      return if @had_error
+
       @interpreter.interpret(statements)
     end
 
-    def error(line, message)
-      report(line, '', message)
-    end
-
-    def report(line, where, message)
-      puts "[line #{line}] Error#{where}: #{message}"
-      @had_error = true
-    end
+    def error(line, message) = report(line, '', message)
 
     def parse_error(token, message)
       if token.type == TokenType::EOF
@@ -66,6 +65,13 @@ module Rblox
     def runtime_error(error)
       puts "#{error.message}\n[line #{error.token.line}]"
       @had_runtime_error = true
+    end
+
+    private
+
+    def report(line, where, message)
+      puts "[line #{line}] Error#{where}: #{message}"
+      @had_error = true
     end
   end
 end

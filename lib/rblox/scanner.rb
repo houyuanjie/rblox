@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'runner'
 require_relative 'token_type'
 require_relative 'token'
 

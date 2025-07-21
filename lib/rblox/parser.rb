@@ -53,7 +53,7 @@ module Rblox
 
       body = block
 
-      Stmt::Function.new(name, parameters, body)
+      Stmt::FunctionStmt.new(name, parameters, body)
     end
 
     def var_declaration
@@ -61,7 +61,7 @@ module Rblox
       initializer = match?(TokenType::EQUAL) ? expression : nil
       consume(TokenType::SEMICOLON, "Expect ';' after variable declaration.")
 
-      Stmt::Var.new(name, initializer)
+      Stmt::VarStmt.new(name, initializer)
     end
 
     def statement
@@ -71,7 +71,7 @@ module Rblox
       return println_statement if match?(TokenType::PRINTLN)
       return return_statement if match?(TokenType::RETURN)
       return while_statement if match?(TokenType::WHILE)
-      return Stmt::Block.new(block) if match?(TokenType::LEFT_BRACE)
+      return Stmt::BlockStmt.new(block) if match?(TokenType::LEFT_BRACE)
 
       expression_statement
     end
@@ -96,10 +96,10 @@ module Rblox
 
       # desugaring
 
-      body = Stmt::Block.new([body, Stmt::Expression.new(increment)]) if increment
-      condition = Expr::Literal.new(true) if condition.nil?
-      body = Stmt::While.new(condition, body)
-      body = Stmt::Block.new([initializer, body]) if initializer
+      body = Stmt::BlockStmt.new([body, Stmt::ExpressionStmt.new(increment)]) if increment
+      condition = Expr::LiteralExpr.new(true) if condition.nil?
+      body = Stmt::WhileStmt.new(condition, body)
+      body = Stmt::BlockStmt.new([initializer, body]) if initializer
 
       body
     end
@@ -112,21 +112,21 @@ module Rblox
       then_branch = statement
       else_branch = match?(TokenType::ELSE) ? statement : nil
 
-      Stmt::If.new(condition, then_branch, else_branch)
+      Stmt::IfStmt.new(condition, then_branch, else_branch)
     end
 
     def print_statement
       value = expression
       consume(TokenType::SEMICOLON, "Expect ';' after value.")
 
-      Stmt::Print.new(value)
+      Stmt::PrintStmt.new(value)
     end
 
     def println_statement
       value = expression
       consume(TokenType::SEMICOLON, "Expect ';' after value.")
 
-      Stmt::Println.new(value)
+      Stmt::PrintlnStmt.new(value)
     end
 
     def return_statement
@@ -135,7 +135,7 @@ module Rblox
 
       consume(TokenType::SEMICOLON, "Expect ';' after return value.")
 
-      Stmt::Return.new(keyword, value)
+      Stmt::ReturnStmt.new(keyword, value)
     end
 
     def while_statement
@@ -144,7 +144,7 @@ module Rblox
       consume(TokenType::RIGHT_PAREN, "Expect ')' after condition.")
       body = statement
 
-      Stmt::While.new(condition, body)
+      Stmt::WhileStmt.new(condition, body)
     end
 
     def block
@@ -158,7 +158,7 @@ module Rblox
       expr = expression
       consume(TokenType::SEMICOLON, "Expect ';' after expression.")
 
-      Stmt::Expression.new(expr)
+      Stmt::ExpressionStmt.new(expr)
     end
 
     def expression = parse_assignment_expr
@@ -170,9 +170,9 @@ module Rblox
         equals = previous_token
         value = parse_assignment_expr
 
-        if expr.is_a?(Expr::Variable)
+        if expr.is_a?(Expr::VariableExpr)
           name = expr.name
-          return Expr::Assign.new(name, value)
+          return Expr::AssignExpr.new(name, value)
         end
 
         error(equals, 'Invalid assignment target.')
@@ -187,7 +187,7 @@ module Rblox
       while match?(TokenType::OR)
         operator = previous_token
         right = parse_and_expr
-        expr = Expr::Logical.new(expr, operator, right)
+        expr = Expr::LogicalExpr.new(expr, operator, right)
       end
 
       expr
@@ -199,7 +199,7 @@ module Rblox
       while match?(TokenType::AND)
         operator = previous_token
         right = parse_equality_expr
-        expr = Expr::Logical.new(expr, operator, right)
+        expr = Expr::LogicalExpr.new(expr, operator, right)
       end
 
       expr
@@ -211,7 +211,7 @@ module Rblox
       while match?(TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL)
         operator = previous_token
         right = parse_comparison_expr
-        expr = Expr::Binary.new(expr, operator, right)
+        expr = Expr::BinaryExpr.new(expr, operator, right)
       end
 
       expr
@@ -223,7 +223,7 @@ module Rblox
       while match?(TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL)
         operator = previous_token
         right = parse_term_expr
-        expr = Expr::Binary.new(expr, operator, right)
+        expr = Expr::BinaryExpr.new(expr, operator, right)
       end
 
       expr
@@ -235,7 +235,7 @@ module Rblox
       while match?(TokenType::MINUS, TokenType::PLUS)
         operator = previous_token
         right = parse_factor_expr
-        expr = Expr::Binary.new(expr, operator, right)
+        expr = Expr::BinaryExpr.new(expr, operator, right)
       end
 
       expr
@@ -247,7 +247,7 @@ module Rblox
       while match?(TokenType::SLASH, TokenType::STAR)
         operator = previous_token
         right = parse_unary_expr
-        expr = Expr::Binary.new(expr, operator, right)
+        expr = Expr::BinaryExpr.new(expr, operator, right)
       end
 
       expr
@@ -257,7 +257,7 @@ module Rblox
       if match?(TokenType::BANG, TokenType::MINUS)
         operator = previous_token
         right = parse_unary_expr
-        return Expr::Unary.new(operator, right)
+        return Expr::UnaryExpr.new(operator, right)
       end
 
       parse_call_expr
@@ -290,24 +290,24 @@ module Rblox
 
       paren = consume(TokenType::RIGHT_PAREN, "Expect ')' after arguments.")
 
-      Expr::Call.new(callee, paren, arguments)
+      Expr::CallExpr.new(callee, paren, arguments)
     end
 
     def parse_primary_expr
       if match?(TokenType::FALSE)
-        Expr::Literal.new(false)
+        Expr::LiteralExpr.new(false)
       elsif match?(TokenType::TRUE)
-        Expr::Literal.new(true)
+        Expr::LiteralExpr.new(true)
       elsif match?(TokenType::NIL)
-        Expr::Literal.new(nil)
+        Expr::LiteralExpr.new(nil)
       elsif match?(TokenType::NUMBER, TokenType::STRING)
-        Expr::Literal.new(previous_token.literal)
+        Expr::LiteralExpr.new(previous_token.literal)
       elsif match?(TokenType::IDENTIFIER)
-        Expr::Variable.new(previous_token)
+        Expr::VariableExpr.new(previous_token)
       elsif match?(TokenType::LEFT_PAREN)
         expr = expression
         consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.")
-        Expr::Grouping.new(expr)
+        Expr::GroupingExpr.new(expr)
       else
         raise error(current_token, 'Expect expression.')
       end

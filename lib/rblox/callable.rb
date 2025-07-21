@@ -29,8 +29,6 @@ module Rblox
           # so, we need a `next` here
           next e.value
         end
-
-        nil
       end
     end
   end
