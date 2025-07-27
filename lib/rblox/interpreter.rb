@@ -93,6 +93,10 @@ module Rblox
       value
     end
 
+    # visit_binary_expr dispatches operators very dynamically,
+    # let steep the type checker ignore it
+    #
+    # steep:ignore:start
     def visit_binary_expr(expr)
       left = evaluate(expr.left)
       right = evaluate(expr.right)
@@ -134,12 +138,13 @@ module Rblox
         left * right
       end
     end
+    # steep:ignore:end
 
     def visit_call_expr(expr)
       callee = evaluate(expr.callee)
       arguments = expr.arguments.map { |arg| evaluate(arg) }
 
-      raise Rblox::RuntimeError.new(expr.paren, 'Can only call functions and classes.') unless callee.respond_to?(:call)
+      raise Rblox::RuntimeError.new(expr.paren, 'Can only call functions and classes.') unless callee.is_a?(Callable)
 
       unless arguments.size == callee.arity
         raise Rblox::RuntimeError.new(expr.paren, "Expected #{callee.arity} arguments but got #{arguments.size}.")
@@ -150,7 +155,7 @@ module Rblox
 
     def visit_grouping_expr(expr) = evaluate(expr.expression)
 
-    def visit_literal_expr(expr) = expr.value
+    def visit_literal_expr(expr) = expr.value || raise
 
     def visit_logical_expr(expr)
       left = evaluate(expr.left)
@@ -170,7 +175,11 @@ module Rblox
         !truthy?(right)
       when TokenType::MINUS
         check_number_operand(expr.operator, right)
-        -Float(right)
+        value = Float(right) || raise
+
+        -value
+      else
+        raise
       end
     end
 
@@ -181,7 +190,7 @@ module Rblox
     def evaluate(expr) = expr.accept(self)
 
     def execute(stmt)
-      if stmt.respond_to?(:each)
+      if stmt.is_a?(Array)
         stmt.each { |s| execute(s) }
       else
         stmt.accept(self)

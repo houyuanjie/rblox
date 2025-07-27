@@ -104,8 +104,8 @@ module Rblox
     def identifier
       advance while alpha_numeric?(peek)
 
-      text = @source[@start...@current]
-      type = KEYWORDS[text] || TokenType::IDENTIFIER
+      text = @source[@start...@current] || raise
+      type = KEYWORDS.fetch(text, TokenType::IDENTIFIER)
       add_token(type)
     end
 
@@ -149,13 +149,13 @@ module Rblox
     def peek
       return "\0" if at_end?
 
-      @source[@current]
+      @source[@current] || raise
     end
 
     def peek_next
       return "\0" if (@current + 1) >= @source.size
 
-      @source[@current + 1]
+      @source[@current + 1] || raise
     end
 
     def alpha?(char) = char.between?('a', 'z') || char.between?('A', 'Z') || char == '_'
@@ -167,13 +167,13 @@ module Rblox
     def at_end? = @current >= @source.size
 
     def advance
-      char = @source[@current]
+      char = @source[@current] || raise
       @current += 1
       char
     end
 
     def add_token(type, literal = nil)
-      text = @source[@start...@current]
+      text = @source[@start...@current] || raise
       @tokens << Token.new(type, text, literal, @line)
     end
   end

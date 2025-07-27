@@ -2,7 +2,11 @@
 
 module Rblox
   module Expr
-    BaseExpr = Module.new
+    module BaseExpr
+      def accept(visitor)
+        raise NotImplementedError
+      end
+    end
 
     variants = {
       Assign: %i[name value],

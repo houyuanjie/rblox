@@ -2,7 +2,11 @@
 
 module Rblox
   module Stmt
-    BaseStmt = Module.new
+    module BaseStmt
+      def accept(visitor)
+        raise NotImplementedError
+      end
+    end
 
     variants = {
       Block: %i[statements],

@@ -1,0 +1,15 @@
+module Rblox
+  class Callable
+    @arity: untyped
+
+    @block: untyped
+
+    attr_reader arity: untyped
+
+    def initialize: (untyped arity) { (?) -> untyped } -> void
+
+    def call: (*untyped, **untyped) ?{ (?) -> untyped } -> untyped
+
+    def self.function: (untyped declaration, ?untyped? closure) -> untyped
+  end
+end

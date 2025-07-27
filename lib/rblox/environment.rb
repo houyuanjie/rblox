@@ -59,6 +59,6 @@ module Rblox
 
     private
 
-    def lexeme_or(name) = name.respond_to?(:lexeme) ? name.lexeme : name
+    def lexeme_or(name) = name.is_a?(Token) ? name.lexeme : name
   end
 end

@@ -1,0 +1,23 @@
+module Rblox
+  class Error < StandardError
+  end
+
+  class ParseError < Error
+  end
+
+  class RuntimeError < Error
+    @token: untyped
+
+    attr_reader token: untyped
+
+    def initialize: (untyped token, untyped message) -> void
+  end
+
+  class Return < Error
+    @value: untyped
+
+    attr_reader value: untyped
+
+    def initialize: (untyped value) -> void
+  end
+end

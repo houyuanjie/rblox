@@ -1,0 +1,31 @@
+module Rblox
+  class Environment
+    @enclosing: untyped
+
+    @values: untyped
+
+    attr_reader enclosing: untyped
+
+    def initialize: (?untyped? enclosing) -> void
+
+    def get: (untyped name) -> untyped
+
+    def assign: (untyped name, untyped value) -> untyped
+
+    def define: (untyped name, untyped value) -> untyped
+
+    def ancestor: (untyped distance) -> untyped
+
+    def get_at: (untyped distance, untyped name) -> untyped
+
+    def assign_at: (untyped distance, untyped name, untyped value) -> untyped
+
+    def to_s: () -> ::String
+
+    attr_reader values: untyped
+
+    private
+
+    def lexeme_or: (untyped name) -> untyped
+  end
+end
