@@ -104,7 +104,7 @@ module Rblox
     def identifier
       advance while alpha_numeric?(peek)
 
-      text = @source[@start...@current] || raise
+      text = slice_nn!(@start...@current)
       type = KEYWORDS[text] || TokenType::IDENTIFIER
       add_token(type)
     end
@@ -117,7 +117,7 @@ module Rblox
         advance while digit?(peek)
       end
 
-      value = Float(@source[@start...@current])
+      value = Float(slice_nn!(@start...@current))
       add_token(TokenType::NUMBER, value)
     end
 
@@ -134,7 +134,7 @@ module Rblox
 
       advance
 
-      value = @source[(@start + 1)...(@current - 1)]
+      value = slice_nn!((@start + 1)...(@current - 1))
       add_token(TokenType::STRING, value)
     end
 
@@ -149,13 +149,13 @@ module Rblox
     def peek
       return "\0" if at_end?
 
-      @source[@current] || raise
+      slice_nn!(@current)
     end
 
     def peek_next
       return "\0" if (@current + 1) >= @source.size
 
-      @source[@current + 1] || raise
+      slice_nn!(@current + 1)
     end
 
     def alpha?(char) = char.between?('a', 'z') || char.between?('A', 'Z') || char == '_'
@@ -167,14 +167,16 @@ module Rblox
     def at_end? = @current >= @source.size
 
     def advance
-      char = @source[@current] || raise
+      char = slice_nn!(@current)
       @current += 1
       char
     end
 
     def add_token(type, literal = nil)
-      text = @source[@start...@current] || raise
+      text = slice_nn!(@start...@current)
       @tokens << Token.new(type, text, literal, @line)
     end
+
+    def slice_nn!(...) = @source.slice(...) || raise('Unexpected nil.') # steep:ignore UnresolvedOverloading
   end
 end

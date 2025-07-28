@@ -35,5 +35,8 @@ module Rblox
     def advance: () -> String
 
     def add_token: (Symbol type, ?untyped literal) -> void
+
+    def slice_nn!: (Integer start, ?Integer length) -> String
+                 | (Range[Integer?] range) -> String
   end
 end

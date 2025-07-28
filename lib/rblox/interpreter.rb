@@ -155,7 +155,7 @@ module Rblox
 
     def visit_grouping_expr(expr) = evaluate(expr.expression)
 
-    def visit_literal_expr(expr) = expr.value || raise
+    def visit_literal_expr(expr) = expr.value
 
     def visit_logical_expr(expr)
       left = evaluate(expr.left)
