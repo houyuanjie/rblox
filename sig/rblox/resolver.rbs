@@ -14,24 +14,9 @@ module Rblox
 
     def resolve: (Expr::BaseExpr | Stmt::BaseStmt | Array[Expr::BaseExpr | Stmt::BaseStmt] expr_or_stmt) -> void
 
-    def visit_block_stmt: (Stmt::BlockStmt stmt) -> void
-    def visit_expression_stmt: (Stmt::ExpressionStmt stmt) -> void
-    def visit_function_stmt: (Stmt::FunctionStmt stmt) -> void
-    def visit_if_stmt: (Stmt::IfStmt stmt) -> void
-    def visit_print_stmt: (Stmt::PrintStmt stmt) -> void
-    def visit_println_stmt: (Stmt::PrintlnStmt stmt) -> void
-    def visit_return_stmt: (Stmt::ReturnStmt stmt) -> void
-    def visit_var_stmt: (Stmt::VarStmt stmt) -> void
-    def visit_while_stmt: (Stmt::WhileStmt stmt) -> void
+    include Stmt::_StmtVisitor[void]
 
-    def visit_assign_expr: (Expr::AssignExpr expr) -> void
-    def visit_binary_expr: (Expr::BinaryExpr expr) -> void
-    def visit_call_expr: (Expr::CallExpr expr) -> void
-    def visit_grouping_expr: (Expr::GroupingExpr expr) -> void
-    def visit_literal_expr: (Expr::LiteralExpr _) -> void
-    def visit_logical_expr: (Expr::LogicalExpr expr) -> void
-    def visit_unary_expr: (Expr::UnaryExpr expr) -> void
-    def visit_variable_expr: (Expr::VariableExpr expr) -> void
+    include Expr::_ExprVisitor[void]
 
     private
 

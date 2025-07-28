@@ -13,24 +13,9 @@ module Rblox
     def resolve: (Expr::BaseExpr expr, Integer depth) -> void
     def execute_block: (Array[Stmt::BaseStmt] statements, Environment environment) -> void
 
-    def visit_block_stmt: (Stmt::BlockStmt stmt) -> void
-    def visit_expression_stmt: (Stmt::ExpressionStmt stmt) -> void
-    def visit_function_stmt: (Stmt::FunctionStmt stmt) -> void
-    def visit_if_stmt: (Stmt::IfStmt stmt) -> void
-    def visit_print_stmt: (Stmt::PrintStmt stmt) -> void
-    def visit_println_stmt: (Stmt::PrintlnStmt stmt) -> void
-    def visit_return_stmt: (Stmt::ReturnStmt stmt) -> void
-    def visit_var_stmt: (Stmt::VarStmt stmt) -> void
-    def visit_while_stmt: (Stmt::WhileStmt stmt) -> void
+    include Stmt::_StmtVisitor[void]
 
-    def visit_assign_expr: (Expr::AssignExpr expr) -> untyped
-    def visit_binary_expr: (Expr::BinaryExpr expr) -> untyped
-    def visit_call_expr: (Expr::CallExpr expr) -> untyped
-    def visit_grouping_expr: (Expr::GroupingExpr expr) -> untyped
-    def visit_literal_expr: (Expr::LiteralExpr expr) -> untyped
-    def visit_logical_expr: (Expr::LogicalExpr expr) -> untyped
-    def visit_unary_expr: (Expr::UnaryExpr expr) -> untyped
-    def visit_variable_expr: (Expr::VariableExpr expr) -> untyped
+    include Expr::_ExprVisitor[untyped]
 
     private
 
