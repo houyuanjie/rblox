@@ -1,0 +1,35 @@
+module Rblox
+  class Interpreter
+    @runner: Runner
+    @globals: Environment
+    @environment: Environment
+    @locals: Hash[Expr::BaseExpr, Integer?]
+
+    attr_reader globals: Environment
+
+    def initialize: (Runner runner) -> void
+
+    def interpret: (Array[Stmt::BaseStmt] statements) -> void
+    def resolve: (Expr::BaseExpr expr, Integer depth) -> void
+    def execute_block: (Array[Stmt::BaseStmt] statements, Environment environment) -> void
+
+    include Stmt::_StmtVisitor[void]
+
+    include Expr::_ExprVisitor[untyped]
+
+    private
+
+    def evaluate: (Expr::BaseExpr expr) -> untyped
+    def execute: (Stmt::BaseStmt | Array[Stmt::BaseStmt] stmt) -> void
+
+    def look_up_variable: (Token name, Expr::BaseExpr expr) -> untyped
+
+    def check_number_operand: (Token operator, untyped operand) -> void
+    def check_number_operands: (Token operator, untyped left, untyped right) -> void
+
+    def truthy?: (untyped object) -> bool
+
+    def stringify: (untyped object) -> String
+    def unescaped: (String string) -> String
+  end
+end

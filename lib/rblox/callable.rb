@@ -18,7 +18,7 @@ module Rblox
         environment = Environment.new(closure)
 
         declaration.params.zip(arguments).each do |param, arg|
-          environment.define(param.lexeme, arg)
+          environment.define(param, arg)
         end
 
         begin

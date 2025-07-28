@@ -1,0 +1,24 @@
+module Rblox
+  class Runner
+    @interpreter: Interpreter
+
+    @had_error: bool
+    @had_runtime_error: bool
+
+    attr_reader had_error: bool
+    attr_reader had_runtime_error: bool
+
+    def initialize: () -> void
+
+    def run_file: (String path) -> void
+    def run_prompt: () -> void
+    def run: (String source) -> void
+
+    def error: (Token | Integer token_or_line, String message) -> void
+    def runtime_error: (RuntimeError error) -> void
+
+    private
+
+    def report: (Integer line, String where, String message) -> void
+  end
+end

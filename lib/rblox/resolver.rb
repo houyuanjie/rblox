@@ -16,7 +16,7 @@ module Rblox
     end
 
     def resolve(expr_or_stmt)
-      if expr_or_stmt.respond_to?(:each)
+      if expr_or_stmt.is_a?(Array)
         expr_or_stmt.each { |child| resolve(child) }
       else
         expr_or_stmt.accept(self)

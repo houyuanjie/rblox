@@ -1,0 +1,33 @@
+module Rblox
+  class Resolver
+    @runner: Runner
+    @interpreter: Interpreter
+    @scopes: Array[Hash[String, bool?]]
+    @current_function: Symbol
+
+    module FunctionType
+      NONE: :fn_none
+      FUNCTION: :fn_function
+    end
+
+    def initialize: (Runner runner, Interpreter interpreter) -> void
+
+    def resolve: (Expr::BaseExpr | Stmt::BaseStmt | Array[Expr::BaseExpr | Stmt::BaseStmt] expr_or_stmt) -> void
+
+    include Stmt::_StmtVisitor[void]
+
+    include Expr::_ExprVisitor[void]
+
+    private
+
+    def resolve_function: (Stmt::FunctionStmt function, Symbol type) -> void
+
+    def begin_scope: () -> void
+    def end_scope: () -> void
+
+    def declare: (Token name) -> void
+    def define: (Token name) -> void
+
+    def resolve_local: (Expr::BaseExpr expr, Token name) -> void
+  end
+end

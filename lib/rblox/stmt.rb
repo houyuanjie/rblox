@@ -2,7 +2,11 @@
 
 module Rblox
   module Stmt
-    BaseStmt = Module.new
+    module BaseStmt
+      def accept(visitor)
+        raise NotImplementedError
+      end
+    end
 
     variants = {
       Block: %i[statements],
@@ -24,6 +28,8 @@ module Rblox
         attr_reader(*fields)
 
         define_method(:initialize) do |*args|
+          # @type self: Object
+
           if args.size != fields.size
             raise ArgumentError, "wrong number of arguments (given #{args.size}, expected #{fields.size})"
           end

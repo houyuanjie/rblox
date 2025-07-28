@@ -15,69 +15,57 @@ module Rblox
     end
 
     def parse
+      # @type var statements: Array[Stmt::BaseStmt]
       statements = []
-      statements << declaration until at_end?
+
+      until at_end?
+        decl_stmt = declaration
+        statements << decl_stmt if decl_stmt
+      end
+
       statements
     end
 
     private
 
-    def declaration
-      return fun_declaration(:function) if match?(TokenType::FUN)
-      return var_declaration if match?(TokenType::VAR)
+    def expression = parse_assignment_expr
 
-      statement
+    def declaration
+      if match?(TokenType::FUN)
+        fun_declaration(:function)
+      elsif match?(TokenType::VAR)
+        var_declaration
+      else
+        statement
+      end
     rescue Rblox::ParseError
       synchronize
       nil
     end
 
-    def fun_declaration(kind)
-      name = consume(TokenType::IDENTIFIER, "Expect #{kind} name.")
-
-      consume(TokenType::LEFT_PAREN, "Expect '(' after #{kind} name.")
-
-      parameters = []
-      unless checked?(TokenType::RIGHT_PAREN)
-        loop do
-          error(current_token, "Can't have more than 255 parameters.") if parameters.size >= 255
-
-          parameters << consume(TokenType::IDENTIFIER, 'Expect parameter name.')
-
-          break unless match?(TokenType::COMMA)
-        end
-      end
-
-      consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters.")
-      consume(TokenType::LEFT_BRACE, "Expect '{' before #{kind} body.")
-
-      body = block
-
-      Stmt::FunctionStmt.new(name, parameters, body)
-    end
-
-    def var_declaration
-      name = consume(TokenType::IDENTIFIER, 'Expect variable name.')
-      initializer = match?(TokenType::EQUAL) ? expression : nil
-      consume(TokenType::SEMICOLON, "Expect ';' after variable declaration.")
-
-      Stmt::VarStmt.new(name, initializer)
-    end
-
     def statement
-      return for_statement if match?(TokenType::FOR)
-      return if_statement if match?(TokenType::IF)
-      return print_statement if match?(TokenType::PRINT)
-      return println_statement if match?(TokenType::PRINTLN)
-      return return_statement if match?(TokenType::RETURN)
-      return while_statement if match?(TokenType::WHILE)
-      return Stmt::BlockStmt.new(block) if match?(TokenType::LEFT_BRACE)
-
-      expression_statement
+      if match?(TokenType::FOR)
+        for_statement
+      elsif match?(TokenType::IF)
+        if_statement
+      elsif match?(TokenType::PRINT)
+        print_statement
+      elsif match?(TokenType::PRINTLN)
+        println_statement
+      elsif match?(TokenType::RETURN)
+        return_statement
+      elsif match?(TokenType::WHILE)
+        while_statement
+      elsif match?(TokenType::LEFT_BRACE)
+        Stmt::BlockStmt.new(block)
+      else
+        expression_statement
+      end
     end
 
     def for_statement
       consume(TokenType::LEFT_PAREN, "Expect '(' after 'for'.")
+
       initializer = if match?(TokenType::SEMICOLON)
                       nil
                     elsif match?(TokenType::VAR)
@@ -138,6 +126,15 @@ module Rblox
       Stmt::ReturnStmt.new(keyword, value)
     end
 
+    def var_declaration
+      name = consume(TokenType::IDENTIFIER, 'Expect variable name.')
+      initializer = match?(TokenType::EQUAL) ? expression : nil
+
+      consume(TokenType::SEMICOLON, "Expect ';' after variable declaration.")
+
+      Stmt::VarStmt.new(name, initializer)
+    end
+
     def while_statement
       consume(TokenType::LEFT_PAREN, "Expect '(' after 'while'.")
       condition = expression
@@ -147,13 +144,6 @@ module Rblox
       Stmt::WhileStmt.new(condition, body)
     end
 
-    def block
-      statements = []
-      statements << declaration until checked?(TokenType::RIGHT_BRACE) || at_end?
-      consume(TokenType::RIGHT_BRACE, "Expect '}' after block.")
-      statements
-    end
-
     def expression_statement
       expr = expression
       consume(TokenType::SEMICOLON, "Expect ';' after expression.")
@@ -161,7 +151,40 @@ module Rblox
       Stmt::ExpressionStmt.new(expr)
     end
 
-    def expression = parse_assignment_expr
+    def fun_declaration(kind)
+      name = consume(TokenType::IDENTIFIER, "Expect #{kind} name.")
+      consume(TokenType::LEFT_PAREN, "Expect '(' after #{kind} name.")
+      # @type var parameters: Array[Token]
+      parameters = []
+      unless checked?(TokenType::RIGHT_PAREN)
+        loop do
+          error(current_token, "Can't have more than 255 parameters.") if parameters.size >= 255
+
+          parameters << consume(TokenType::IDENTIFIER, 'Expect parameter name.')
+
+          break unless match?(TokenType::COMMA)
+        end
+      end
+      consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters.")
+
+      consume(TokenType::LEFT_BRACE, "Expect '{' before #{kind} body.")
+      body = block
+
+      Stmt::FunctionStmt.new(name, parameters, body)
+    end
+
+    def block
+      # @type var statements: Array[Stmt::BaseStmt]
+      statements = []
+
+      until checked?(TokenType::RIGHT_BRACE) || at_end?
+        decl_stmt = declaration
+        statements << decl_stmt if decl_stmt
+      end
+      consume(TokenType::RIGHT_BRACE, "Expect '}' after block.")
+
+      statements
+    end
 
     def parse_assignment_expr
       expr = parse_or_expr
@@ -263,19 +286,8 @@ module Rblox
       parse_call_expr
     end
 
-    def parse_call_expr
-      expr = parse_primary_expr
-
-      loop do
-        break unless match?(TokenType::LEFT_PAREN)
-
-        expr = finish_parse_call_expr(expr)
-      end
-
-      expr
-    end
-
     def finish_parse_call_expr(callee)
+      # @type var arguments: Array[Expr::BaseExpr]
       arguments = []
 
       unless checked?(TokenType::RIGHT_PAREN)
@@ -291,6 +303,18 @@ module Rblox
       paren = consume(TokenType::RIGHT_PAREN, "Expect ')' after arguments.")
 
       Expr::CallExpr.new(callee, paren, arguments)
+    end
+
+    def parse_call_expr
+      expr = parse_primary_expr
+
+      loop do
+        break unless match?(TokenType::LEFT_PAREN)
+
+        expr = finish_parse_call_expr(expr)
+      end
+
+      expr
     end
 
     def parse_primary_expr
@@ -350,7 +374,8 @@ module Rblox
     def previous_token = @tokens[@current - 1]
 
     def error(token, message)
-      @runner.parse_error(token, message)
+      @runner.error(token, message)
+
       Rblox::ParseError.new
     end
 

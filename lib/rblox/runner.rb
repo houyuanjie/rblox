@@ -27,8 +27,8 @@ module Rblox
     def run_prompt
       loop do
         print '> '
-        line = $stdin.gets.chomp
-        break if %w[exit quit].include?(line)
+        line = $stdin.gets&.chomp
+        break if line.nil? || %w[exit quit].include?(line)
 
         run(line)
 
@@ -52,13 +52,12 @@ module Rblox
       @interpreter.interpret(statements)
     end
 
-    def error(line, message) = report(line, '', message)
-
-    def parse_error(token, message)
-      if token.type == TokenType::EOF
-        report(token.line, ' at end', message)
+    def error(token_or_line, message)
+      if token_or_line.is_a?(Token)
+        lexeme = token_or_line.type == TokenType::EOF ? 'end' : token_or_line.lexeme
+        report(token_or_line.line, " at '#{lexeme}'", message)
       else
-        report(token.line, " at '#{token.lexeme}'", message)
+        report(token_or_line, '', message)
       end
     end
 

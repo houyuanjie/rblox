@@ -1,0 +1,130 @@
+module Rblox
+  module Expr
+    module BaseExpr
+      def accept: [R] (_ExprVisitor[R] visitor) -> R
+    end
+
+    interface _ExprVisitor[R]
+      def visit_assign_expr: (AssignExpr expr) -> R
+      def visit_binary_expr: (BinaryExpr expr) -> R
+      def visit_call_expr: (CallExpr expr) -> R
+      def visit_get_expr: (GetExpr expr) -> R
+      def visit_grouping_expr: (GroupingExpr expr) -> R
+      def visit_literal_expr: (LiteralExpr expr) -> R
+      def visit_logical_expr: (LogicalExpr expr) -> R
+      def visit_set_expr: (SetExpr expr) -> R
+      def visit_super_expr: (SuperExpr expr) -> R
+      def visit_this_expr: (ThisExpr expr) -> R
+      def visit_unary_expr: (UnaryExpr expr) -> R
+      def visit_variable_expr: (VariableExpr expr) -> R
+    end
+
+    class AssignExpr
+      include BaseExpr
+
+      attr_reader name: Token
+      attr_reader value: BaseExpr
+
+      def initialize: (Token name, BaseExpr value) -> void
+    end
+
+    class BinaryExpr
+      include BaseExpr
+
+      attr_reader left: BaseExpr
+      attr_reader operator: Token
+      attr_reader right: BaseExpr
+
+      def initialize: (BaseExpr left, Token operator, BaseExpr right) -> void
+    end
+
+    class CallExpr
+      include BaseExpr
+
+      attr_reader callee: BaseExpr
+      attr_reader paren: Token
+      attr_reader arguments: Array[BaseExpr]
+
+      def initialize: (BaseExpr callee, Token paren, Array[BaseExpr] arguments) -> void
+    end
+
+    class GetExpr
+      include BaseExpr
+
+      attr_reader object: BaseExpr
+      attr_reader name: Token
+
+      def initialize: (BaseExpr object, Token name) -> void
+    end
+
+    class GroupingExpr
+      include BaseExpr
+
+      attr_reader expression: BaseExpr
+
+      def initialize: (BaseExpr expression) -> void
+    end
+
+    class LiteralExpr
+      include BaseExpr
+
+      attr_reader value: untyped
+
+      def initialize: (untyped value) -> void
+    end
+
+    class LogicalExpr
+      include BaseExpr
+
+      attr_reader left: BaseExpr
+      attr_reader operator: Token
+      attr_reader right: BaseExpr
+
+      def initialize: (BaseExpr left, Token operator, BaseExpr right) -> void
+    end
+
+    class SetExpr
+      include BaseExpr
+
+      attr_reader object: BaseExpr
+      attr_reader name: Token
+      attr_reader value: BaseExpr
+
+      def initialize: (BaseExpr object, Token name, BaseExpr value) -> void
+    end
+
+    class SuperExpr
+      include BaseExpr
+
+      attr_reader keyword: Token
+      attr_reader method: Token
+
+      def initialize: (Token keyword, Token method) -> void
+    end
+
+    class ThisExpr
+      include BaseExpr
+
+      attr_reader keyword: Token
+
+      def initialize: (Token keyword) -> void
+    end
+
+    class UnaryExpr
+      include BaseExpr
+
+      attr_reader operator: Token
+      attr_reader right: BaseExpr
+
+      def initialize: (Token operator, BaseExpr right) -> void
+    end
+
+    class VariableExpr
+      include BaseExpr
+
+      attr_reader name: Token
+
+      def initialize: (Token name) -> void
+    end
+  end
+end

@@ -1,0 +1,11 @@
+module Rblox
+  class Token
+    attr_reader type: Symbol
+    attr_reader lexeme: String
+    attr_reader literal: untyped
+    attr_reader line: Integer
+
+    def initialize: (Symbol type, String lexeme, untyped literal, Integer line) -> void
+                  | (type: Symbol, lexeme: String, literal: untyped, line: Integer) -> void
+  end
+end

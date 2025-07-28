@@ -1,0 +1,23 @@
+module Rblox
+  class Environment
+    @enclosing: Environment?
+    @values: Hash[String, untyped]
+
+    attr_reader enclosing: Environment?
+    attr_reader values: Hash[String, untyped]
+
+    def initialize: (?Environment? enclosing) -> void
+
+    def get: (Token name) -> untyped
+    def assign: (Token name, untyped value) -> void
+    
+    def define: (Token | String | Symbol name, untyped value) -> void
+
+    def ancestor: (Integer distance) -> Environment
+
+    def get_at: (Integer distance, Token name) -> untyped
+    def assign_at: (Integer distance, Token name, untyped value) -> untyped
+
+    def to_s: () -> String
+  end
+end

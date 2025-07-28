@@ -1,0 +1,109 @@
+module Rblox
+  module Stmt
+    module BaseStmt
+      def accept: [R] (_StmtVisitor[R] visitor) -> R
+    end
+
+    interface _StmtVisitor[R]
+      def visit_block_stmt: (BlockStmt stmt) -> R
+      def visit_class_stmt: (ClassStmt stmt) -> R
+      def visit_expression_stmt: (ExpressionStmt stmt) -> R
+      def visit_function_stmt: (FunctionStmt stmt) -> R
+      def visit_if_stmt: (IfStmt stmt) -> R
+      def visit_print_stmt: (PrintStmt stmt) -> R
+      def visit_println_stmt: (PrintlnStmt stmt) -> R
+      def visit_return_stmt: (ReturnStmt stmt) -> R
+      def visit_var_stmt: (VarStmt stmt) -> R
+      def visit_while_stmt: (WhileStmt stmt) -> R
+    end
+
+    class BlockStmt
+      include BaseStmt
+
+      attr_reader statements: Array[BaseStmt]
+
+      def initialize: (Array[BaseStmt] statements) -> void
+    end
+
+    class ClassStmt
+      include BaseStmt
+
+      attr_reader name: Token
+      attr_reader superclass: Expr::VariableExpr?
+      attr_reader methods: Array[FunctionStmt]
+
+      def initialize: (Token name, Expr::VariableExpr? superclass, Array[FunctionStmt] methods) -> void
+    end
+
+    class ExpressionStmt
+      include BaseStmt
+
+      attr_reader expression: Expr::BaseExpr
+
+      def initialize: (Expr::BaseExpr expression) -> void
+    end
+
+    class FunctionStmt
+      include BaseStmt
+
+      attr_reader name: Token
+      attr_reader params: Array[Token]
+      attr_reader body: Array[BaseStmt]
+
+      def initialize: (Token name, Array[Token] params, Array[BaseStmt] body) -> void
+    end
+
+    class IfStmt
+      include BaseStmt
+
+      attr_reader condition: Expr::BaseExpr
+      attr_reader then_branch: BaseStmt
+      attr_reader else_branch: BaseStmt?
+
+      def initialize: (Expr::BaseExpr condition, BaseStmt then_branch, BaseStmt? else_branch) -> void
+    end
+
+    class PrintStmt
+      include BaseStmt
+
+      attr_reader expression: Expr::BaseExpr
+
+      def initialize: (Expr::BaseExpr expression) -> void
+    end
+
+    class PrintlnStmt
+      include BaseStmt
+
+      attr_reader expression: Expr::BaseExpr
+
+      def initialize: (Expr::BaseExpr expression) -> void
+    end
+
+    class ReturnStmt
+      include BaseStmt
+
+      attr_reader keyword: Token
+      attr_reader value: Expr::BaseExpr?
+
+      def initialize: (Token keyword, Expr::BaseExpr? value) -> void
+    end
+
+    class VarStmt
+      include BaseStmt
+
+      attr_reader name: Token
+      attr_reader initializer: Expr::BaseExpr?
+
+      def initialize: (Token name, Expr::BaseExpr? initializer) -> void
+    end
+
+    class WhileStmt
+      include BaseStmt
+
+      attr_reader condition: Expr::BaseExpr
+      attr_reader body: BaseStmt
+
+      def initialize: (Expr::BaseExpr condition, BaseStmt body) -> void
+    end
+  end
+end

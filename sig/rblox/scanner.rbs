@@ -1,0 +1,42 @@
+module Rblox
+  class Scanner
+    KEYWORDS: Hash[String, Symbol?]
+
+    @runner: Runner
+    @source: String
+    @tokens: Array[Token]
+    @start: Integer
+    @current: Integer
+    @line: Integer
+
+    def initialize: (Runner runner, String source) -> void
+
+    def scan_tokens: () -> Array[Token]
+
+    private
+
+    def scan_token: () -> void
+
+    def identifier: () -> void
+    def number: () -> void
+    def string: () -> void
+
+    def match?: (String expected) -> bool
+
+    def peek: () -> String
+    def peek_next: () -> String
+
+    def alpha?: (String char) -> bool
+    def alpha_numeric?: (String char) -> bool
+    def digit?: (String char) -> bool
+
+    def at_end?: () -> bool
+
+    def advance: () -> String
+
+    def add_token: (Symbol type, ?untyped literal) -> void
+
+    def slice_nn!: (Integer start, ?Integer length) -> String
+                 | (Range[Integer?] range) -> String
+  end
+end

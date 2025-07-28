@@ -1,0 +1,55 @@
+module Rblox
+  class Parser
+    @runner: Runner
+    @tokens: Array[Token]
+    @current: Integer
+
+    def initialize: (Runner runner, Array[Token] tokens) -> void
+
+    def parse: () -> Array[Stmt::BaseStmt]
+
+    private
+
+    def expression: () -> Expr::BaseExpr
+
+    def declaration: () -> Stmt::BaseStmt?
+    def statement: () -> Stmt::BaseStmt
+
+    def for_statement: () -> Stmt::BaseStmt
+    def if_statement: () -> Stmt::BaseStmt
+    def print_statement: () -> Stmt::BaseStmt
+    def println_statement: () -> Stmt::BaseStmt
+    def return_statement: () -> Stmt::BaseStmt
+    def var_declaration: () -> Stmt::BaseStmt
+    def while_statement: () -> Stmt::BaseStmt
+    def expression_statement: () -> Stmt::BaseStmt
+
+    def fun_declaration: (Symbol kind) -> Stmt::FunctionStmt
+    def block: () -> Array[Stmt::BaseStmt]
+
+    def parse_assignment_expr: () -> Expr::BaseExpr
+    def parse_or_expr: () -> Expr::BaseExpr
+    def parse_and_expr: () -> Expr::BaseExpr
+    def parse_equality_expr: () -> Expr::BaseExpr
+    def parse_comparison_expr: () -> Expr::BaseExpr
+    def parse_term_expr: () -> Expr::BaseExpr
+    def parse_factor_expr: () -> Expr::BaseExpr
+    def parse_unary_expr: () -> Expr::BaseExpr
+    def finish_parse_call_expr: (Expr::BaseExpr callee) -> Expr::BaseExpr
+    def parse_call_expr: () -> Expr::BaseExpr
+    def parse_primary_expr: () -> Expr::BaseExpr
+
+    def match?: (*Symbol types) -> bool
+    def consume: (Symbol type, String message) -> Token
+    def checked?: (Symbol type) -> bool
+    def advance: () -> Token
+    def at_end?: () -> bool
+
+    # peek
+    def current_token: () -> Token
+    def previous_token: () -> Token
+
+    def error: (Token token, String message) -> Rblox::ParseError
+    def synchronize: () -> void
+  end
+end
