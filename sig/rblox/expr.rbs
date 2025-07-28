@@ -68,9 +68,9 @@ module Rblox
     class LiteralExpr
       include BaseExpr
 
-      attr_reader value: Object?
+      attr_reader value: untyped
 
-      def initialize: (Object? value) -> void
+      def initialize: (untyped value) -> void
     end
 
     class LogicalExpr

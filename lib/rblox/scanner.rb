@@ -105,7 +105,7 @@ module Rblox
       advance while alpha_numeric?(peek)
 
       text = @source[@start...@current] || raise
-      type = KEYWORDS.fetch(text, TokenType::IDENTIFIER)
+      type = KEYWORDS[text] || TokenType::IDENTIFIER
       add_token(type)
     end
 

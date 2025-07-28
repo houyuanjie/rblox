@@ -1,31 +1,23 @@
 module Rblox
   class Environment
-    @enclosing: untyped
+    @enclosing: Environment?
+    @values: Hash[String, untyped]
 
-    @values: untyped
+    attr_reader enclosing: Environment?
+    attr_reader values: Hash[String, untyped]
 
-    attr_reader enclosing: untyped
+    def initialize: (?Environment? enclosing) -> void
 
-    def initialize: (?untyped? enclosing) -> void
+    def get: (Token name) -> untyped
+    def assign: (Token name, untyped value) -> void
+    
+    def define: (Token | String | Symbol name, untyped value) -> void
 
-    def get: (untyped name) -> untyped
+    def ancestor: (Integer distance) -> Environment
 
-    def assign: (untyped name, untyped value) -> untyped
+    def get_at: (Integer distance, Token name) -> untyped
+    def assign_at: (Integer distance, Token name, untyped value) -> untyped
 
-    def define: (untyped name, untyped value) -> untyped
-
-    def ancestor: (untyped distance) -> untyped
-
-    def get_at: (untyped distance, untyped name) -> untyped
-
-    def assign_at: (untyped distance, untyped name, untyped value) -> untyped
-
-    def to_s: () -> ::String
-
-    attr_reader values: untyped
-
-    private
-
-    def lexeme_or: (untyped name) -> untyped
+    def to_s: () -> String
   end
 end

@@ -1,15 +1,14 @@
 module Rblox
   class Callable
-    @arity: untyped
+    @arity: Integer
+    @block: ^(?Interpreter interpreter, ?Array[untyped] arguments) -> untyped
 
-    @block: untyped
+    attr_reader arity: Integer
 
-    attr_reader arity: untyped
+    def initialize: (Integer arity) { (?Interpreter interpreter, ?Array[untyped] arguments) -> untyped } -> void
 
-    def initialize: (untyped arity) { (?) -> untyped } -> void
+    def call: (?Interpreter interpreter, ?Array[untyped] arguments) -> untyped
 
-    def call: (*untyped, **untyped) ?{ (?) -> untyped } -> untyped
-
-    def self.function: (untyped declaration, ?untyped? closure) -> untyped
+    def self.function: (Stmt::FunctionStmt declaration, ?Environment? closure) -> Callable
   end
 end

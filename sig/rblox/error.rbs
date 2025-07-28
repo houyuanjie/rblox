@@ -6,11 +6,11 @@ module Rblox
   end
 
   class RuntimeError < Error
-    @token: untyped
+    @token: Token
 
-    attr_reader token: untyped
+    attr_reader token: Token
 
-    def initialize: (untyped token, untyped message) -> void
+    def initialize: (Token token, String message) -> void
   end
 
   class Return < Error

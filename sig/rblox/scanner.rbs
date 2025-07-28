@@ -34,6 +34,6 @@ module Rblox
 
     def advance: () -> String
 
-    def add_token: (Symbol type, ?Object? literal) -> void
+    def add_token: (Symbol type, ?untyped literal) -> void
   end
 end

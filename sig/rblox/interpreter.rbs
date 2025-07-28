@@ -23,28 +23,28 @@ module Rblox
     def visit_var_stmt: (Stmt::VarStmt stmt) -> void
     def visit_while_stmt: (Stmt::WhileStmt stmt) -> void
 
-    def visit_assign_expr: (Expr::AssignExpr expr) -> Object
-    def visit_binary_expr: (Expr::BinaryExpr expr) -> Object
-    def visit_call_expr: (Expr::CallExpr expr) -> Object
-    def visit_grouping_expr: (Expr::GroupingExpr expr) -> Object
-    def visit_literal_expr: (Expr::LiteralExpr expr) -> Object
-    def visit_logical_expr: (Expr::LogicalExpr expr) -> Object
-    def visit_unary_expr: (Expr::UnaryExpr expr) -> Object
-    def visit_variable_expr: (Expr::VariableExpr expr) -> Object
+    def visit_assign_expr: (Expr::AssignExpr expr) -> untyped
+    def visit_binary_expr: (Expr::BinaryExpr expr) -> untyped
+    def visit_call_expr: (Expr::CallExpr expr) -> untyped
+    def visit_grouping_expr: (Expr::GroupingExpr expr) -> untyped
+    def visit_literal_expr: (Expr::LiteralExpr expr) -> untyped
+    def visit_logical_expr: (Expr::LogicalExpr expr) -> untyped
+    def visit_unary_expr: (Expr::UnaryExpr expr) -> untyped
+    def visit_variable_expr: (Expr::VariableExpr expr) -> untyped
 
     private
 
-    def evaluate: (Expr::BaseExpr expr) -> Object
+    def evaluate: (Expr::BaseExpr expr) -> untyped
     def execute: (Stmt::BaseStmt | Array[Stmt::BaseStmt] stmt) -> void
 
-    def look_up_variable: (Token name, Expr::BaseExpr expr) -> Object
+    def look_up_variable: (Token name, Expr::BaseExpr expr) -> untyped
 
-    def check_number_operand: (Token operator, Object operand) -> void
-    def check_number_operands: (Token operator, Object left, Object right) -> void
+    def check_number_operand: (Token operator, untyped operand) -> void
+    def check_number_operands: (Token operator, untyped left, untyped right) -> void
 
-    def truthy?: (Object? object) -> bool
+    def truthy?: (untyped object) -> bool
 
-    def stringify: (Object? object) -> String
+    def stringify: (untyped object) -> String
     def unescaped: (String string) -> String
   end
 end
