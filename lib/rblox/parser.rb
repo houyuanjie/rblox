@@ -397,9 +397,9 @@ module Rblox
             TokenType::RETURN
           return
         end
-      end
 
-      advance
+        advance
+      end
     end
   end
 end
