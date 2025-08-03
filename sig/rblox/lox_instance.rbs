@@ -1,0 +1,9 @@
+module Rblox
+  class LoxInstance
+    @lox_class: LoxClass
+
+    attr_reader lox_class: LoxClass
+
+    def initialize: (LoxClass lox_class) -> void
+  end
+end
