@@ -13,6 +13,9 @@ module Rblox
     def expression: () -> Expr::BaseExpr
 
     def declaration: () -> Stmt::BaseStmt?
+
+    def class_declaration: () -> Stmt::ClassStmt
+
     def statement: () -> Stmt::BaseStmt
 
     def for_statement: () -> Stmt::BaseStmt

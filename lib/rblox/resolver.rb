@@ -29,6 +29,11 @@ module Rblox
       end_scope
     end
 
+    def visit_class_stmt(stmt)
+      declare(stmt.name)
+      define(stmt.name)
+    end
+
     def visit_expression_stmt(stmt) = resolve(stmt.expression)
 
     def visit_function_stmt(stmt)

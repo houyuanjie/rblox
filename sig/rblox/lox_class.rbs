@@ -1,0 +1,11 @@
+module Rblox
+  class LoxClass < Callable
+    @name: String
+
+    attr_reader name: String
+
+    def initialize: (Token | Symbol | String name) -> void
+
+    def instantiate: (Interpreter interpreter, Array[untyped] arguments) -> LoxInstance
+  end
+end

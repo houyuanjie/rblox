@@ -31,7 +31,9 @@ module Rblox
     def expression = parse_assignment_expr
 
     def declaration
-      if match?(TokenType::FUN)
+      if match?(TokenType::CLASS)
+        class_declaration
+      elsif match?(TokenType::FUN)
         fun_declaration(:function)
       elsif match?(TokenType::VAR)
         var_declaration
@@ -41,6 +43,19 @@ module Rblox
     rescue Rblox::ParseError
       synchronize
       nil
+    end
+
+    def class_declaration
+      name = consume(TokenType::IDENTIFIER, 'Expect class name.')
+      consume(TokenType::LEFT_BRACE, "Expect '{' before class body.")
+
+      # @type var methods: Array[Stmt::FunctionStmt]
+      methods = []
+      methods << fun_declaration(:method) unless checked?(TokenType::RIGHT_BRACE) || at_end?
+
+      consume(TokenType::RIGHT_BRACE, "Expect '}' after class body.")
+
+      Stmt::ClassStmt.new(name, nil, methods)
     end
 
     def statement

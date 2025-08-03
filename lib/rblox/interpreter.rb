@@ -4,6 +4,7 @@ require_relative 'error'
 require_relative 'token_type'
 require_relative 'environment'
 require_relative 'callable'
+require_relative 'lox_class'
 
 module Rblox
   class Interpreter
@@ -40,6 +41,12 @@ module Rblox
     end
 
     def visit_block_stmt(stmt) = execute_block(stmt.statements, Environment.new(@environment))
+
+    def visit_class_stmt(stmt)
+      @environment.define(stmt.name, nil)
+      klass = LoxClass.new(stmt.name)
+      @environment.assign(stmt.name, klass)
+    end
 
     def visit_expression_stmt(stmt) = evaluate(stmt.expression)
 
