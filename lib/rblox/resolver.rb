@@ -85,6 +85,10 @@ module Rblox
       resolve(expr.arguments)
     end
 
+    def visit_get_expr(expr)
+      resolve(expr.object)
+    end
+
     def visit_grouping_expr(expr) = resolve(expr.expression)
 
     def visit_literal_expr(_) = nil
@@ -92,6 +96,11 @@ module Rblox
     def visit_logical_expr(expr)
       resolve(expr.left)
       resolve(expr.right)
+    end
+
+    def visit_set_expr(expr)
+      resolve(expr.value)
+      resolve(expr.object)
     end
 
     def visit_unary_expr(expr) = resolve(expr.right)

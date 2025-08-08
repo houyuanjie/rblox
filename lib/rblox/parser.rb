@@ -211,6 +211,8 @@ module Rblox
         if expr.is_a?(Expr::VariableExpr)
           name = expr.name
           return Expr::AssignExpr.new(name, value)
+        elsif expr.is_a?(Expr::GetExpr)
+          return Expr::SetExpr.new(expr.object, expr.name, value)
         end
 
         error(equals, 'Invalid assignment target.')
@@ -324,9 +326,14 @@ module Rblox
       expr = parse_primary_expr
 
       loop do
-        break unless match?(TokenType::LEFT_PAREN)
-
-        expr = finish_parse_call_expr(expr)
+        if match?(TokenType::LEFT_PAREN)
+          expr = finish_parse_call_expr(expr)
+        elsif match?(TokenType::DOT)
+          name = consume(TokenType::IDENTIFIER, "Expect property name after '.'.")
+          expr = Expr::GetExpr.new(expr, name)
+        else
+          break
+        end
       end
 
       expr
