@@ -5,6 +5,7 @@ require_relative 'token_type'
 require_relative 'environment'
 require_relative 'callable'
 require_relative 'lox_class'
+require_relative 'lox_instance'
 
 module Rblox
   class Interpreter
@@ -160,6 +161,13 @@ module Rblox
       callee.call(self, arguments)
     end
 
+    def visit_get_expr(expr)
+      object = evaluate(expr.object)
+      return object.get(expr.name) if object.is_a?(LoxInstance)
+
+      raise Rblox::RuntimeError.new(expr.name, 'Only instances have properties.')
+    end
+
     def visit_grouping_expr(expr) = evaluate(expr.expression)
 
     def visit_literal_expr(expr) = expr.value
@@ -172,6 +180,16 @@ module Rblox
       return left if operator_type == TokenType::AND && !truthy?(left)
 
       evaluate(expr.right)
+    end
+
+    def visit_set_expr(expr)
+      object = evaluate(expr.object)
+      raise Rblox::RuntimeError.new(expr.name, 'Only instances have fields.') unless object.is_a?(LoxInstance)
+
+      value = evaluate(expr.value)
+      object.set(expr.name, value)
+
+      value
     end
 
     def visit_unary_expr(expr)

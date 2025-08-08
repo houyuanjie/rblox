@@ -1,8 +1,13 @@
 module Rblox
   class LoxInstance
     @lox_class: LoxClass
+    @fields: Hash[String, untyped]
 
     attr_reader lox_class: LoxClass
+    attr_reader fields: Hash[String, untyped]
+
+    def get: (Token name) -> untyped
+    def set: (Token name, untyped value) -> void
 
     def initialize: (LoxClass lox_class) -> void
   end
