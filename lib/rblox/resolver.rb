@@ -5,6 +5,7 @@ module Rblox
     module FunctionType
       NONE = :fn_none
       FUNCTION = :fn_function
+      METHOD = :fn_method
     end
 
     def initialize(runner, interpreter)
@@ -32,6 +33,10 @@ module Rblox
     def visit_class_stmt(stmt)
       declare(stmt.name)
       define(stmt.name)
+
+      stmt.methods.each do |mth|
+        resolve_function(mth, FunctionType::METHOD)
+      end
     end
 
     def visit_expression_stmt(stmt) = resolve(stmt.expression)

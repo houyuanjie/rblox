@@ -15,6 +15,9 @@ module Rblox
       lexeme = name.lexeme
       return @fields[lexeme] if @fields.key?(lexeme)
 
+      method = @lox_class.find_method(lexeme)
+      return method if method
+
       raise Rblox::RuntimeError.new(name, "Undefined property '#{name.lexeme}'.")
     end
 
