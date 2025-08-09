@@ -6,9 +6,9 @@ require_relative 'lox_instance'
 
 module Rblox
   class LoxClass < Callable
-    attr_reader :name
+    attr_reader :name, :methods
 
-    def initialize(name)
+    def initialize(name, methods)
       # overloading with different parameter lists
       # steep the type checker does not seems to aware this
       #
@@ -19,11 +19,14 @@ module Rblox
       # steep:ignore:end
 
       @name = name.is_a?(Token) ? name.lexeme : name.to_s
+      @methods = methods
     end
 
     def instantiate(_interpreter, _arguments)
       LoxInstance.new(self)
     end
+
+    def find_method(name) = @methods[name]
 
     def to_s = "class #{@name}"
   end

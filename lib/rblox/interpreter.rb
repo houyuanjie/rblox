@@ -45,7 +45,14 @@ module Rblox
 
     def visit_class_stmt(stmt)
       @environment.define(stmt.name, nil)
-      klass = LoxClass.new(stmt.name)
+
+      # @type var methods: Hash[String, Callable?]
+      methods = {}
+      stmt.methods.each do |mth|
+        methods[mth.name.lexeme] = Callable.function(mth, @environment)
+      end
+
+      klass = LoxClass.new(stmt.name, methods)
       @environment.assign(stmt.name, klass)
     end
 

@@ -8,6 +8,7 @@ module Rblox
     module FunctionType
       NONE: :fn_none
       FUNCTION: :fn_function
+      METHOD: :fn_method
     end
 
     def initialize: (Runner runner, Interpreter interpreter) -> void
