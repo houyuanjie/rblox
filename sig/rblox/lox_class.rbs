@@ -1,14 +1,14 @@
 module Rblox
   class LoxClass < Callable
     @name: String
-    @methods: Hash[String, Callable?]
+    @methods: Hash[String, LoxFunction?]
 
     attr_reader name: String
-    attr_reader methods: Hash[String, Callable?]
+    attr_reader methods: Hash[String, LoxFunction?]
 
-    def initialize: (Token | Symbol | String name, Hash[String, Callable?] methods) -> void
+    def initialize: (Token | Symbol | String name, Hash[String, LoxFunction?] methods) -> void
 
     def instantiate: (Interpreter interpreter, Array[untyped] arguments) -> LoxInstance
-    def find_method: (String name) -> Callable?
+    def find_method: (String name) -> LoxFunction?
   end
 end
