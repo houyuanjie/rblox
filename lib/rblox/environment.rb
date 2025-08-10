@@ -13,8 +13,10 @@ module Rblox
     end
 
     def get(name)
-      if values.key?(name.lexeme)
-        values[name.lexeme]
+      lexeme = lexeme_or(name)
+
+      if values.key?(lexeme)
+        values[lexeme]
       elsif enclosing
         enclosing.get(name)
       else
@@ -23,8 +25,10 @@ module Rblox
     end
 
     def assign(name, value)
-      if values.key?(name.lexeme)
-        values[name.lexeme] = value
+      lexeme = lexeme_or(name)
+
+      if values.key?(lexeme)
+        values[lexeme] = value
       elsif enclosing
         enclosing.assign(name, value)
       else
@@ -32,10 +36,7 @@ module Rblox
       end
     end
 
-    def define(name, value)
-      lexeme = name.is_a?(Token) ? name.lexeme : name.to_s
-      values[lexeme] = value
-    end
+    def define(name, value) = values[lexeme_or(name)] = value
 
     def ancestor(distance)
       # @type var environment: Environment
@@ -48,10 +49,14 @@ module Rblox
       environment
     end
 
-    def get_at(distance, name) = ancestor(distance).values[name.lexeme]
+    def get_at(distance, name) = ancestor(distance).values[lexeme_or(name)]
 
-    def assign_at(distance, name, value) = ancestor(distance).values[name.lexeme] = value
+    def assign_at(distance, name, value) = ancestor(distance).values[lexeme_or(name)] = value
 
     def to_s = "Environment(values = #{values}, enclosing = #{enclosing})"
+
+    private
+
+    def lexeme_or(name) = name.is_a?(Token) ? name.lexeme : name.to_s
   end
 end

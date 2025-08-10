@@ -10,14 +10,18 @@ module Rblox
 
     def get: (Token name) -> untyped
     def assign: (Token name, untyped value) -> void
-    
+
     def define: (Token | String | Symbol name, untyped value) -> void
 
     def ancestor: (Integer distance) -> Environment
 
-    def get_at: (Integer distance, Token name) -> untyped
-    def assign_at: (Integer distance, Token name, untyped value) -> untyped
+    def get_at: (Integer distance, Token | String | Symbol name) -> untyped
+    def assign_at: (Integer distance, Token | String | Symbol name, untyped value) -> untyped
 
     def to_s: () -> String
+
+    private
+
+    def lexeme_or: (Token | String | Symbol name) -> String
   end
 end

@@ -2,12 +2,16 @@ module Rblox
   class LoxFunction < Callable
     @declaration: Stmt::FunctionStmt
     @closure: Environment?
+    @is_initializer: bool
 
     attr_reader declaration: Stmt::FunctionStmt
     attr_reader closure: Environment?
 
-    def initialize: (Stmt::FunctionStmt declaration, ?Environment? closure) -> void
+    def initialize: (Stmt::FunctionStmt declaration, ?Environment? closure, ?is_initializer: bool) -> void
 
     def bind: (LoxInstance instance) -> LoxFunction
+    def bind_call: (LoxInstance instance, Interpreter interpreter, Array[untyped] arguments) -> untyped
+
+    def initializer?: () -> bool
   end
 end

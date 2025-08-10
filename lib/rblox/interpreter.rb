@@ -50,7 +50,8 @@ module Rblox
       # @type var methods: Hash[String, LoxFunction?]
       methods = {}
       stmt.methods.each do |mth|
-        methods[mth.name.lexeme] = LoxFunction.new(mth, @environment)
+        is_initializer = mth.name.lexeme == 'init'
+        methods[mth.name.lexeme] = LoxFunction.new(mth, @environment, is_initializer:)
       end
 
       klass = LoxClass.new(stmt.name, methods)
@@ -60,7 +61,7 @@ module Rblox
     def visit_expression_stmt(stmt) = evaluate(stmt.expression)
 
     def visit_function_stmt(stmt)
-      function = LoxFunction.new(stmt, @environment)
+      function = LoxFunction.new(stmt, @environment, is_initializer: false)
       @environment.define(stmt.name, function)
     end
 
