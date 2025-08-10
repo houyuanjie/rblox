@@ -4,11 +4,17 @@ module Rblox
     @interpreter: Interpreter
     @scopes: Array[Hash[String, bool?]]
     @current_function: Symbol
+    @current_class: Symbol
 
     module FunctionType
       NONE: :fn_none
       FUNCTION: :fn_function
       METHOD: :fn_method
+    end
+
+    module ClassType
+      NONE: :tpe_none
+      CLASS: :tpe_class
     end
 
     def initialize: (Runner runner, Interpreter interpreter) -> void

@@ -348,6 +348,8 @@ module Rblox
         Expr::LiteralExpr.new(nil)
       elsif match?(TokenType::NUMBER, TokenType::STRING)
         Expr::LiteralExpr.new(previous_token.literal)
+      elsif match?(TokenType::THIS)
+        Expr::ThisExpr.new(previous_token)
       elsif match?(TokenType::IDENTIFIER)
         Expr::VariableExpr.new(previous_token)
       elsif match?(TokenType::LEFT_PAREN)

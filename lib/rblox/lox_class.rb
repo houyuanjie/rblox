@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'error'
 require_relative 'callable'
 require_relative 'lox_instance'
 
@@ -9,18 +8,13 @@ module Rblox
     attr_reader :name, :methods
 
     def initialize(name, methods)
-      # overloading with different parameter lists
-      # steep the type checker does not seems to aware this
-      #
-      # steep:ignore:start
-      super(0) do |interpreter, arguments|
-        instantiate(interpreter, arguments)
-      end
-      # steep:ignore:end
+      super(0)
 
       @name = name.is_a?(Token) ? name.lexeme : name.to_s
       @methods = methods
     end
+
+    def call(interpreter, arguments) = instantiate(interpreter, arguments)
 
     def instantiate(_interpreter, _arguments)
       LoxInstance.new(self)

@@ -1,0 +1,13 @@
+module Rblox
+  class LoxFunction < Callable
+    @declaration: Stmt::FunctionStmt
+    @closure: Environment?
+
+    attr_reader declaration: Stmt::FunctionStmt
+    attr_reader closure: Environment?
+
+    def initialize: (Stmt::FunctionStmt declaration, ?Environment? closure) -> void
+
+    def bind: (LoxInstance instance) -> LoxFunction
+  end
+end

@@ -4,6 +4,7 @@ require_relative 'error'
 require_relative 'token_type'
 require_relative 'environment'
 require_relative 'callable'
+require_relative 'lox_function'
 require_relative 'lox_class'
 require_relative 'lox_instance'
 
@@ -46,10 +47,10 @@ module Rblox
     def visit_class_stmt(stmt)
       @environment.define(stmt.name, nil)
 
-      # @type var methods: Hash[String, Callable?]
+      # @type var methods: Hash[String, LoxFunction?]
       methods = {}
       stmt.methods.each do |mth|
-        methods[mth.name.lexeme] = Callable.function(mth, @environment)
+        methods[mth.name.lexeme] = LoxFunction.new(mth, @environment)
       end
 
       klass = LoxClass.new(stmt.name, methods)
@@ -59,7 +60,7 @@ module Rblox
     def visit_expression_stmt(stmt) = evaluate(stmt.expression)
 
     def visit_function_stmt(stmt)
-      function = Callable.function(stmt, @environment)
+      function = LoxFunction.new(stmt, @environment)
       @environment.define(stmt.name, function)
     end
 
@@ -198,6 +199,8 @@ module Rblox
 
       value
     end
+
+    def visit_this_expr(expr) = look_up_variable(expr.keyword, expr)
 
     def visit_unary_expr(expr)
       right = evaluate(expr.right)

@@ -8,12 +8,19 @@ module Rblox
       METHOD = :fn_method
     end
 
+    module ClassType
+      NONE = :tpe_none
+      CLASS = :tpe_class
+    end
+
     def initialize(runner, interpreter)
       @runner = runner
 
       @interpreter = interpreter
       @scopes = []
+
       @current_function = FunctionType::NONE
+      @current_class = ClassType::NONE
     end
 
     def resolve(expr_or_stmt)
@@ -31,12 +38,24 @@ module Rblox
     end
 
     def visit_class_stmt(stmt)
+      enclosing_class = @current_class
+      @current_class = ClassType::CLASS
+
       declare(stmt.name)
       define(stmt.name)
+
+      begin_scope
+      scope = @scopes.last
+
+      scope['this'] = true
 
       stmt.methods.each do |mth|
         resolve_function(mth, FunctionType::METHOD)
       end
+
+      end_scope
+
+      @current_class = enclosing_class
     end
 
     def visit_expression_stmt(stmt) = resolve(stmt.expression)
@@ -90,9 +109,7 @@ module Rblox
       resolve(expr.arguments)
     end
 
-    def visit_get_expr(expr)
-      resolve(expr.object)
-    end
+    def visit_get_expr(expr) = resolve(expr.object)
 
     def visit_grouping_expr(expr) = resolve(expr.expression)
 
@@ -106,6 +123,15 @@ module Rblox
     def visit_set_expr(expr)
       resolve(expr.value)
       resolve(expr.object)
+    end
+
+    def visit_this_expr(expr)
+      if @current_class == ClassType::NONE
+        @runner.error(expr.keyword, "Can't use 'this' outside of a class.")
+        return
+      end
+
+      resolve_local(expr, expr.keyword)
     end
 
     def visit_unary_expr(expr) = resolve(expr.right)
