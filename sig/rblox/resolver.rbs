@@ -9,6 +9,7 @@ module Rblox
     module FunctionType
       NONE: :fn_none
       FUNCTION: :fn_function
+      INITIALIZER: :fn_initializer
       METHOD: :fn_method
     end
 

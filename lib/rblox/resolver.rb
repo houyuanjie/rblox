@@ -5,6 +5,7 @@ module Rblox
     module FunctionType
       NONE = :fn_none
       FUNCTION = :fn_function
+      INITIALIZER = :fn_initializer
       METHOD = :fn_method
     end
 
@@ -50,7 +51,13 @@ module Rblox
       scope['this'] = true
 
       stmt.methods.each do |mth|
-        resolve_function(mth, FunctionType::METHOD)
+        declaration = if mth.name.lexeme == 'init'
+                        FunctionType::INITIALIZER
+                      else
+                        FunctionType::METHOD
+                      end
+
+        resolve_function(mth, declaration)
       end
 
       end_scope
@@ -80,7 +87,13 @@ module Rblox
     def visit_return_stmt(stmt)
       @runner.error(stmt.keyword, "Can't return from top-level code.") if @current_function == FunctionType::NONE
 
-      resolve(stmt.value) if stmt.value
+      return unless stmt.value
+
+      if @current_function == FunctionType::INITIALIZER
+        @runner.error(stmt.keyword, "Can't return a value from an initializer.")
+      end
+
+      resolve(stmt.value)
     end
 
     def visit_var_stmt(stmt)
