@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "rubocop.vscode-rubocop",
+        "soutaro.steep-vscode",
+        "soutaro.rbs-syntax",
+        "koichisasada.vscode-rdbg"
+    ]
+}
