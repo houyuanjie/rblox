@@ -5,12 +5,13 @@ require_relative 'lox_instance'
 
 module Rblox
   class LoxClass < Callable
-    attr_reader :name, :methods
+    attr_reader :name, :superclass, :methods
 
-    def initialize(name, methods)
+    def initialize(name, superclass, methods)
       super(methods['init']&.arity || 0)
 
       @name = name.is_a?(Token) ? name.lexeme : name.to_s
+      @superclass = superclass
       @methods = methods
     end
 
@@ -25,7 +26,7 @@ module Rblox
       instance
     end
 
-    def find_method(name) = @methods[name]
+    def find_method(name) = @methods[name] || @superclass&.find_method(name)
 
     def to_s = "class #{@name}"
   end

@@ -45,7 +45,24 @@ module Rblox
     def visit_block_stmt(stmt) = execute_block(stmt.statements, Environment.new(@environment))
 
     def visit_class_stmt(stmt)
+      # @type var superclass: LoxClass?
+      superclass = nil
+      if stmt.superclass
+        superclass = evaluate(stmt.superclass)
+
+        unless superclass.is_a?(LoxClass)
+          raise Rblox::RuntimeError.new(stmt.superclass.name,
+                                        'Superclass must be a class.')
+        end
+      end
+
       @environment.define(stmt.name, nil)
+
+      if stmt.superclass
+        # push superclass
+        @environment = Environment.new(@environment)
+        @environment.define('super', superclass)
+      end
 
       # @type var methods: Hash[String, LoxFunction?]
       methods = {}
@@ -54,7 +71,13 @@ module Rblox
         methods[mth.name.lexeme] = LoxFunction.new(mth, @environment, is_initializer:)
       end
 
-      klass = LoxClass.new(stmt.name, methods)
+      klass = LoxClass.new(stmt.name, superclass, methods)
+
+      if stmt.superclass
+        # pop superclass
+        @environment = @environment.enclosing || raise('Unexpected nil.')
+      end
+
       @environment.assign(stmt.name, klass)
     end
 
@@ -199,6 +222,21 @@ module Rblox
       object.set(expr.name, value)
 
       value
+    end
+
+    def visit_super_expr(expr)
+      if (distance = @locals[expr])
+        # @type var superclass: LoxClass
+        superclass = @environment.get_at(distance, 'super') || raise('Unexpected nil.')
+        # @type var object: LoxInstance
+        object = @environment.get_at(distance - 1, 'this') || raise('Unexpected nil.')
+        method = superclass.find_method(expr.method.lexeme)
+        raise Rblox::RuntimeError.new(expr.method, "Undefined property '#{expr.method.lexeme}'.") unless method
+
+        method.bind(object)
+      else
+        raise('Unexpected nil.')
+      end
     end
 
     def visit_this_expr(expr) = look_up_variable(expr.keyword, expr)

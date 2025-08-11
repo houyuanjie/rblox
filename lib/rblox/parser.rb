@@ -47,15 +47,23 @@ module Rblox
 
     def class_declaration
       name = consume(TokenType::IDENTIFIER, 'Expect class name.')
+
+      # @type var superclass: Expr::VariableExpr?
+      superclass = nil
+      if match?(TokenType::LESS)
+        consume(TokenType::IDENTIFIER, 'Expect superclass name.')
+        superclass = Expr::VariableExpr.new(previous_token)
+      end
+
       consume(TokenType::LEFT_BRACE, "Expect '{' before class body.")
 
       # @type var methods: Array[Stmt::FunctionStmt]
       methods = []
-      methods << fun_declaration(:method) unless checked?(TokenType::RIGHT_BRACE) || at_end?
+      methods << fun_declaration(:method) until checked?(TokenType::RIGHT_BRACE) || at_end?
 
       consume(TokenType::RIGHT_BRACE, "Expect '}' after class body.")
 
-      Stmt::ClassStmt.new(name, nil, methods)
+      Stmt::ClassStmt.new(name, superclass, methods)
     end
 
     def statement
@@ -348,6 +356,11 @@ module Rblox
         Expr::LiteralExpr.new(nil)
       elsif match?(TokenType::NUMBER, TokenType::STRING)
         Expr::LiteralExpr.new(previous_token.literal)
+      elsif match?(TokenType::SUPER)
+        keyword = previous_token
+        consume(TokenType::DOT, "Expect '.' after 'super'.")
+        method = consume(TokenType::IDENTIFIER, 'Expect superclass method name.')
+        Expr::SuperExpr.new(keyword, method)
       elsif match?(TokenType::THIS)
         Expr::ThisExpr.new(previous_token)
       elsif match?(TokenType::IDENTIFIER)
