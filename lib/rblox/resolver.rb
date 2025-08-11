@@ -12,6 +12,7 @@ module Rblox
     module ClassType
       NONE = :tpe_none
       CLASS = :tpe_class
+      SUBCLASS = :tpe_subclass
     end
 
     def initialize(runner, interpreter)
@@ -45,10 +46,20 @@ module Rblox
       declare(stmt.name)
       define(stmt.name)
 
-      begin_scope
-      scope = @scopes.last
+      if stmt.superclass
+        if stmt.name.lexeme == stmt.superclass.name.lexeme
+          @runner.error(stmt.superclass.name, "A class can't inherit from itself.")
+        end
 
-      scope['this'] = true
+        @current_class = ClassType::SUBCLASS
+        resolve(stmt.superclass)
+
+        begin_scope # super
+        @scopes.last['super'] = true
+      end
+
+      begin_scope # this
+      @scopes.last['this'] = true
 
       stmt.methods.each do |mth|
         declaration = if mth.name.lexeme == 'init'
@@ -60,7 +71,11 @@ module Rblox
         resolve_function(mth, declaration)
       end
 
-      end_scope
+      end_scope # this
+
+      if stmt.superclass
+        end_scope # super
+      end
 
       @current_class = enclosing_class
     end
@@ -136,6 +151,16 @@ module Rblox
     def visit_set_expr(expr)
       resolve(expr.value)
       resolve(expr.object)
+    end
+
+    def visit_super_expr(expr)
+      if @current_class == ClassType::NONE
+        @runner.error(expr.keyword, "Can't use 'super' outside of a class.")
+      elsif @current_class != ClassType::SUBCLASS
+        @runner.error(expr.keyword, "Can't use 'super' in a class with no superclass.")
+      end
+
+      resolve_local(expr, expr.keyword)
     end
 
     def visit_this_expr(expr)

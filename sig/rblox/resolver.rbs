@@ -16,6 +16,7 @@ module Rblox
     module ClassType
       NONE: :tpe_none
       CLASS: :tpe_class
+      SUBCLASS: :tpe_subclass
     end
 
     def initialize: (Runner runner, Interpreter interpreter) -> void
