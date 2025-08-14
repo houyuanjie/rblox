@@ -20,7 +20,9 @@ module Rblox
 
       @locals = {}
 
-      @globals.define(:clock, Callable.new(0) { Time.now })
+      clock = Callable.new(0)
+      def clock.call(_, _) = Time.now.to_f
+      @globals.define(:clock, clock)
     end
 
     def interpret(statements)
