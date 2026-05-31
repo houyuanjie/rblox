@@ -4,4 +4,4 @@ IFS=$'\n\t'
 set -vx
 
 bundle update --bundler
-bundle update
+bundle update --all
