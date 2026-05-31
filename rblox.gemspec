@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary = 'Lox interpreter in Ruby.'
   # spec.description = 'TODO: Write a longer description or delete this line.'
   # spec.homepage = "TODO: Put your gem's website or public repo URL here."
-  spec.required_ruby_version = '>= 3.4'
+  spec.required_ruby_version = '>= 4.0'
 
   spec.metadata['allowed_push_host'] = 'http://localhost:9292'
 
